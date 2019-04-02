@@ -1,8 +1,9 @@
-package logic;
+package models.bank.logic;
 
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import models.user.logic.User;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

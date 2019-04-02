@@ -1,20 +1,21 @@
-package logic;
+package models.user.logic;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import models.bank.logic.Account;
 
 import java.util.ArrayList;
 import java.util.UUID;
 
 public class User {
 
-    String getName() {
+    public String getName() {
         return name;
     }
 
     private String name;
     final private UUID uuid;
-    ArrayList<Account> ownedAccounts;
+    public ArrayList<Account> ownedAccounts;
 
     public User() {
         uuid = UUID.randomUUID();
@@ -26,7 +27,7 @@ public class User {
         this.name = name;
     }
 
-    UUID getID() {
+    public UUID getID() {
         return uuid;
     }
 

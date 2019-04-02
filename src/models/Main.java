@@ -1,6 +1,9 @@
-package logic;
+package models;
 
-import controller.Controller;
+import controller.LauncherController;
+import models.bank.logic.Account;
+import models.bank.logic.Bank;
+import models.user.logic.User;
 
 import java.util.ArrayList;
 
@@ -8,7 +11,7 @@ public class Main {
 
     public Bank bank;
 
-    public Main(Controller appController) {
+    public Main(LauncherController appController) {
 
         bank = new Bank(appController);
 
@@ -43,9 +46,9 @@ public class Main {
             account3.updateBalance(3000.0, 'D');
 
             /** when threads are sync. use below
-             bank.deposit4Demo(account1, company, 1000.0, 0);
-             bank.deposit4Demo(account2, company, 2000.0, 0);
-             bank.deposit4Demo(account3, company, 3000.0, 0);
+             models.models.user.bank.deposit4Demo(account1, company, 1000.0, 0);
+             models.models.user.bank.deposit4Demo(account2, company, 2000.0, 0);
+             models.models.user.bank.deposit4Demo(account3, company, 3000.0, 0);
              **/
 
         } catch (Exception e) {

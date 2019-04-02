@@ -1,18 +1,17 @@
-package controller;
-
+package models.user.controller;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import logic.Account;
-import logic.Main;
-import logic.Transaction;
-import logic.User;
+import models.Main;
+import models.bank.logic.Account;
+import models.bank.logic.Transaction;
+import models.user.logic.User;
 
 import java.util.concurrent.TimeUnit;
 
-public class Controller {
+public class UserController {
 
     private Main main;
 
@@ -21,7 +20,6 @@ public class Controller {
     private int delay4Demo = 2;
 
     public void initialize() {
-        main = new Main(this);
 
         userTable_User.setCellValueFactory(cD -> cD.getValue().getNameSP());
 
@@ -131,7 +129,7 @@ public class Controller {
         clearDelayButtons();
 
         try {
-            if (user == null) throw new Exception("Please Select User");
+            if (user == null) throw new Exception("Please Select UserApp");
             if (account == null) throw new Exception("Please Select Account");
 
         } catch (Exception e) {

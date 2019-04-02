@@ -4,11 +4,11 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class App extends Application {
+public class LauncherApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        Parent root = FXMLLoader.load(getClass().getResource("/view/view.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/view/LauncherView.fxml"));
         primaryStage.setTitle("334-Bank");
         primaryStage.setResizable(false);
         primaryStage.setScene(new Scene(root));

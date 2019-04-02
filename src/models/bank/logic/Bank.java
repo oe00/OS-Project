@@ -1,6 +1,7 @@
-package logic;
+package models.bank.logic;
 
-import controller.Controller;
+import controller.LauncherController;
+import models.user.logic.User;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -8,7 +9,7 @@ import java.util.UUID;
 
 public class Bank {
 
-    private Controller appController;
+    private LauncherController appController;
 
     private HashMap<UUID, Account> bankAccounts;
     private HashMap<UUID, User> bankUsers;
@@ -18,12 +19,12 @@ public class Bank {
         bankUsers = new HashMap<>();
     }
 
-    Bank(Controller appController) {
+    public Bank(LauncherController appController) {
         this();
         this.appController = appController;
     }
 
-    Account createAccount(User user, String accountName) {
+    public Account createAccount(User user, String accountName) {
 
         if (bankUsers.get(user.getID()) == null) {
             return null;
@@ -38,7 +39,7 @@ public class Bank {
         return account;
     }
 
-    User createUser(String name) {
+    public User createUser(String name) {
         User user = new User(name);
         bankUsers.put(user.getID(), user);
 
@@ -51,7 +52,7 @@ public class Bank {
         User userExists = bankUsers.get(user.getID());
 
         if (userExists == null) {
-            throw new Exception("User not found.");
+            throw new Exception("UserApp not found.");
         }
     }
 
@@ -70,11 +71,11 @@ public class Bank {
         checkUserExists(user);
 
         if (!user.getID().equals(account.getAccountOwnerID())) {
-            throw new Exception("User is not the owner of the account");
+            throw new Exception("UserApp is not the owner of the account");
         }
     }
 
-    void addAccessToAccount(Account account, User owner, User newUser) throws Exception {
+    public void addAccessToAccount(Account account, User owner, User newUser) throws Exception {
 
         checkAddAccessPermission(account, owner);
 
@@ -92,7 +93,7 @@ public class Bank {
     private void checkAccessPermission(Account account, User user) throws Exception {
 
         if (account.authenticatedUsers.stream().noneMatch(u -> u.equals(user.getID()))) {
-            throw new Exception("Failed / User Auth.");
+            throw new Exception("Failed / UserApp Auth.");
         }
     }
 
@@ -132,7 +133,7 @@ public class Bank {
     /** sync **/
 
     /**
-     * withdraw() method checks for user permissions, account limit, completes the transaction,
+     * withdraw() method checks for models.models.user permissions, account limit, completes the transaction,
      * adds it to account transaction history, deletes it from "Pending Transactions" table and adds it
      * to "Transaction History" table.
      * note: it is taking a "mock_transaction" as input because UUID in "mock_transaction" is unique and already
@@ -216,7 +217,7 @@ public class Bank {
     /** sync **/
 
     /**
-     * deposit() method checks for user permissions, completes the transaction,
+     * deposit() method checks for models.models.user permissions, completes the transaction,
      * adds it to account transaction history, deletes it from "Pending Transactions" table and adds it
      * to "Transaction History" table.
      * note: it is taking a "mock_transaction" as input because UUID in "mock_transaction" is unique and already

@@ -1,4 +1,4 @@
-package logic;
+package models.bank.logic;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -62,7 +62,7 @@ public class Account {
         return new SimpleStringProperty("$" + balance.toString());
     }
 
-    void updateBalance(Double amount, char type) {
+    public void updateBalance(Double amount, char type) {
         switch (type) {
             case 'D':
                 balance += amount;

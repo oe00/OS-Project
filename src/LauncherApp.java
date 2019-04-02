@@ -7,9 +7,9 @@ import javafx.stage.Stage;
 public class LauncherApp extends Application {
 
     @Override
-    public void start(Stage primaryStage) throws Exception{
+    public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("/view/LauncherView.fxml"));
-        primaryStage.setTitle("334-Bank");
+        primaryStage.setTitle("334-Launcher");
         primaryStage.setResizable(false);
         primaryStage.setScene(new Scene(root));
         primaryStage.sizeToScene();

@@ -7,13 +7,21 @@ import javafx.stage.Stage;
 
 public class BankApp extends Stage {
 
-    public void start(Stage primaryStage) throws Exception{
-        Parent root = FXMLLoader.load(getClass().getResource("/view/LauncherView.fxml"));
-        primaryStage.setTitle("334-Bank");
-        primaryStage.setResizable(false);
-        primaryStage.setScene(new Scene(root));
-        primaryStage.sizeToScene();
-        primaryStage.show();
+    private BankApp() throws Exception {
+        Parent root = FXMLLoader.load(getClass().getResource("/models/bank/view/BankView.fxml"));
+        setTitle("334-Bank");
+        setResizable(false);
+        setScene(new Scene(root));
+        sizeToScene();
+        show();
+    }
+
+    public static void launch(){
+        try {
+            new BankApp();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

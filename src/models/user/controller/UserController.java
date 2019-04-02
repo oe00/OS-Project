@@ -1,5 +1,6 @@
 package models.user.controller;
 
+import controller.LauncherController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -9,6 +10,10 @@ import models.bank.logic.Account;
 import models.bank.logic.Transaction;
 import models.user.logic.User;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
 import java.util.concurrent.TimeUnit;
 
 public class UserController {
@@ -19,28 +24,25 @@ public class UserController {
 
     private int delay4Demo = 2;
 
+    private DataOutputStream toServer;
+    private DataInputStream fromServer;
+
     public void initialize() {
+        startUser();
+    }
 
-        userTable_User.setCellValueFactory(cD -> cD.getValue().getNameSP());
+    public void startUser() {
+        try {
+            Socket socket = new Socket("localhost", LauncherController.port);
 
-        userTable.setItems(userTableList);
-
-        accountTable_Account.setCellValueFactory(cD -> cD.getValue().getNameSP());
-        accountTable_Balance.setCellValueFactory(cD -> cD.getValue().getBalanceSP());
-
-        accountTable.setItems(accountTableList);
-
-        initPendingTable();
-
-        initTransactionTable();
-
-        delay3sec.setToggleGroup(delayController);
-        delay5sec.setToggleGroup(delayController);
-        delay10sec.setToggleGroup(delayController);
-
-        assignDelays();
+            fromServer = new DataInputStream(socket.getInputStream());
+            toServer = new DataOutputStream(socket.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
+
 
     private void initTransactionTable() {
         transactionHistoryTable_ID.setCellValueFactory(cD -> cD.getValue().getIdSP());

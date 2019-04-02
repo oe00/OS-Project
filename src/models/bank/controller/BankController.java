@@ -1,5 +1,6 @@
 package models.bank.controller;
 
+import controller.LauncherController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -9,6 +10,12 @@ import models.bank.logic.Account;
 import models.bank.logic.Transaction;
 import models.user.logic.User;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.concurrent.TimeUnit;
 
 public class BankController {
@@ -20,28 +27,45 @@ public class BankController {
     private int delay4Demo = 2;
 
     public void initialize() {
-
-
-        userTable_User.setCellValueFactory(cD -> cD.getValue().getNameSP());
-
-        userTable.setItems(userTableList);
-
-        accountTable_Account.setCellValueFactory(cD -> cD.getValue().getNameSP());
-        accountTable_Balance.setCellValueFactory(cD -> cD.getValue().getBalanceSP());
-
-        accountTable.setItems(accountTableList);
-
-        initPendingTable();
-
-        initTransactionTable();
-
-        delay3sec.setToggleGroup(delayController);
-        delay5sec.setToggleGroup(delayController);
-        delay10sec.setToggleGroup(delayController);
-
-        assignDelays();
-
+            startBank();
     }
+
+    public void startBank() {
+        new Thread(() -> {
+            try {
+                ServerSocket serverSocket = new ServerSocket(LauncherController.port);
+                while (true) {
+                    // Listen for a new connection request
+                    Socket socket = serverSocket.accept();
+
+                    InetAddress inetAddress = socket.getInetAddress();
+
+                    // Create a new thread for the connection
+                    handleUser(socket);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    public void handleUser(Socket socket) {
+        new Thread(() -> {
+            try {
+                DataInputStream inputFromClient = new DataInputStream(socket.getInputStream());
+                DataOutputStream outputToClient = new DataOutputStream(socket.getOutputStream());
+
+                while (true) {
+                    String str1 = inputFromClient.readUTF();
+                    String str2 = str1.toUpperCase();
+                    outputToClient.writeChars(str2);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
 
     private void initTransactionTable() {
         transactionHistoryTable_ID.setCellValueFactory(cD -> cD.getValue().getIdSP());

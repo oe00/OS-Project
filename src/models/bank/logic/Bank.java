@@ -34,7 +34,7 @@ public class Bank {
         user.ownedAccounts.add(account);
         bankAccounts.put(account.getID(), account);
 
-        appController.updateAccountList(account);
+        //appController.updateAccountList(account);
 
         return account;
     }
@@ -122,7 +122,7 @@ public class Bank {
                 transaction = new Transaction(account, user, amount, "Withdraw", requestTime, e.getMessage(), delay);
 
             } finally {
-                appController.addToPendingTransactionsTableList(transaction);
+                //appController.addToPendingTransactionsTableList(transaction);
 
                 withdraw(account, user, amount, delay, transaction);
             }
@@ -153,7 +153,7 @@ public class Bank {
 
             account.checkLimit(amount);
 
-            appController.delayThread();
+            //appController.delayThread();
 
             account.updateBalance(amount, 'W');
 
@@ -166,7 +166,7 @@ public class Bank {
 
         } catch (Exception e) {
 
-            appController.delayThread();
+            //appController.delayThread();
 
             if (delay != 0) {
                 requestTime = new Date();
@@ -179,9 +179,9 @@ public class Bank {
 
             account.transactions.add(transaction);
 
-            appController.deleteFromPendingTransactionsTableList(transaction);
+            //appController.deleteFromPendingTransactionsTableList(transaction);
 
-            appController.updateTransactionHistoryTableList(transaction);
+            //appController.updateTransactionHistoryTableList(transaction);
 
         }
 
@@ -204,7 +204,7 @@ public class Bank {
             } catch (Exception e) {
                 transaction = new Transaction(account, user, amount, "Deposit", requestTime, e.getMessage(), delay);
             } finally {
-                appController.addToPendingTransactionsTableList(transaction);
+                //appController.addToPendingTransactionsTableList(transaction);
 
                 deposit(account, user, amount, delay, transaction);
             }
@@ -233,7 +233,7 @@ public class Bank {
 
         try {
 
-            appController.delayThread();
+            //appController.delayThread();
 
             checkTransactionPermission(account, user);
 
@@ -251,9 +251,9 @@ public class Bank {
 
             account.transactions.add(transaction);
 
-            appController.deleteFromPendingTransactionsTableList(transaction);
+            //appController.deleteFromPendingTransactionsTableList(transaction);
 
-            appController.updateTransactionHistoryTableList(transaction);
+            //appController.updateTransactionHistoryTableList(transaction);
 
         }
 

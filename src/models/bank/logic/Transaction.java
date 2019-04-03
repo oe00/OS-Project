@@ -5,11 +5,12 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import models.user.logic.User;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
-public class Transaction {
+public class Transaction implements Serializable {
 
     private static SimpleDateFormat date_format = new SimpleDateFormat("HH:mm:ss.SSS");
 

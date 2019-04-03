@@ -3,15 +3,16 @@ package models.bank.logic;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class Account {
+public class Account implements Serializable {
     private String name;
     final private UUID uuid;
     private UUID accountOwner;
 
-    ArrayList<UUID> authenticatedUsers;
+    public ArrayList<UUID> authenticatedUsers;
 
     private Double balance;
     ArrayList<Transaction> transactions;

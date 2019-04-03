@@ -11,7 +11,7 @@ public class Bank {
 
     private LauncherController launcherController;
 
-    private HashMap<UUID, Account> bankAccounts;
+    public HashMap<UUID, Account> bankAccounts;
     private HashMap<UUID, User> bankUsers;
 
     public Bank() {

@@ -30,6 +30,7 @@ public class UserController {
 
     public void initialize() {
 
+        initAccountTable();
         initTransactionTable();
         initPendingTable();
     }
@@ -48,11 +49,28 @@ public class UserController {
 
                 toServer.writeObject(user);
 
+                while(true){
+                    try {
+                        Account account = (Account) fromServer.readObject();
+                        updateAccountList(account);
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+
 
             } catch (IOException  e) {
                 e.printStackTrace();
             }
         }).start();
+
+    }
+
+    private void initAccountTable() {
+        accountTable_Account.setCellValueFactory(cD -> cD.getValue().getNameSP());
+        accountTable_Balance.setCellValueFactory(cD -> cD.getValue().getBalanceSP());
+
+        accountTable.setItems(accountTableList);
 
     }
 
@@ -160,7 +178,6 @@ public class UserController {
 
         toServer.writeObject(account);
         toServer.writeObject(amountDouble);
-        toServer.writeObject(this.user);
         toServer.writeObject("Deposit");
 
     }
@@ -177,7 +194,6 @@ public class UserController {
 
         toServer.writeObject(account);
         toServer.writeObject(amountDouble);
-        toServer.writeObject(this.user);
         toServer.writeObject("Withdraw");
 
     }

@@ -16,6 +16,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class BankController {
@@ -67,6 +68,14 @@ public class BankController {
                 User user = (User) inputFromClient.readObject();
 
                 updateUserList(user);
+
+                List<Account> accounts = new ArrayList<>(main.bank.bankAccounts.values());
+
+                for(Account a:accounts){
+                    if(a.authenticatedUsers.contains(user.getID())){
+                        outputToClient.writeObject(a);
+                    }
+                }
 
                 while (true) {
 

@@ -4,10 +4,11 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import models.bank.logic.Account;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class User {
+public class User implements Serializable {
 
     public String getName() {
         return name;

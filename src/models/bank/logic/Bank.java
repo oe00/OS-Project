@@ -9,19 +9,19 @@ import java.util.UUID;
 
 public class Bank {
 
-    private LauncherController appController;
+    private LauncherController launcherController;
 
     private HashMap<UUID, Account> bankAccounts;
     private HashMap<UUID, User> bankUsers;
 
-    private Bank() {
+    public Bank() {
         bankAccounts = new HashMap<>();
         bankUsers = new HashMap<>();
     }
 
-    public Bank(LauncherController appController) {
+    public Bank(LauncherController launcherController) {
         this();
-        this.appController = appController;
+        this.launcherController = launcherController;
     }
 
     public Account createAccount(User user, String accountName) {
@@ -34,8 +34,6 @@ public class Bank {
         user.ownedAccounts.add(account);
         bankAccounts.put(account.getID(), account);
 
-        //appController.updateAccountList(account);
-
         return account;
     }
 
@@ -43,7 +41,8 @@ public class Bank {
         User user = new User(name);
         bankUsers.put(user.getID(), user);
 
-        appController.updateUserList(user);
+        //bankController.updateUserList(user);
+        launcherController.updateUserList(user);
         return user;
     }
 
@@ -122,7 +121,7 @@ public class Bank {
                 transaction = new Transaction(account, user, amount, "Withdraw", requestTime, e.getMessage(), delay);
 
             } finally {
-                //appController.addToPendingTransactionsTableList(transaction);
+                //bankController.addToPendingTransactionsTableList(transaction);
 
                 withdraw(account, user, amount, delay, transaction);
             }
@@ -153,7 +152,7 @@ public class Bank {
 
             account.checkLimit(amount);
 
-            //appController.delayThread();
+            //bankController.delayThread();
 
             account.updateBalance(amount, 'W');
 
@@ -166,7 +165,7 @@ public class Bank {
 
         } catch (Exception e) {
 
-            //appController.delayThread();
+            //bankController.delayThread();
 
             if (delay != 0) {
                 requestTime = new Date();
@@ -179,9 +178,9 @@ public class Bank {
 
             account.transactions.add(transaction);
 
-            //appController.deleteFromPendingTransactionsTableList(transaction);
+            //bankController.deleteFromPendingTransactionsTableList(transaction);
 
-            //appController.updateTransactionHistoryTableList(transaction);
+            //bankController.updateTransactionHistoryTableList(transaction);
 
         }
 
@@ -204,7 +203,7 @@ public class Bank {
             } catch (Exception e) {
                 transaction = new Transaction(account, user, amount, "Deposit", requestTime, e.getMessage(), delay);
             } finally {
-                //appController.addToPendingTransactionsTableList(transaction);
+                //bankController.addToPendingTransactionsTableList(transaction);
 
                 deposit(account, user, amount, delay, transaction);
             }
@@ -233,7 +232,7 @@ public class Bank {
 
         try {
 
-            //appController.delayThread();
+            //bankController.delayThread();
 
             checkTransactionPermission(account, user);
 
@@ -251,9 +250,9 @@ public class Bank {
 
             account.transactions.add(transaction);
 
-            //appController.deleteFromPendingTransactionsTableList(transaction);
+            //bankController.deleteFromPendingTransactionsTableList(transaction);
 
-            //appController.updateTransactionHistoryTableList(transaction);
+            //bankController.updateTransactionHistoryTableList(transaction);
 
         }
 

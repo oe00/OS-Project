@@ -10,12 +10,22 @@ import models.bank.BankApp;
 import models.user.UserApp;
 import models.user.logic.User;
 
+import java.util.ArrayList;
+
 public class LauncherController {
 
-    public void initialize() {
-        main = new Main(this);
+    private Main main;
 
+    public void initialize() {
         initUserTable();
+
+        connectedUserList = new ArrayList<>();
+
+        try {
+            main = new Main(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -27,11 +37,24 @@ public class LauncherController {
     }
 
     public void launchUser() {
-        UserApp.launch();
+        User user = userTable.getSelectionModel().getSelectedItem();
+
+        try {
+            if(!connectedUserList.contains(user)) {
+                connectedUserList.add(user);
+                new UserApp(user);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void launchBank() {
-        BankApp.launch();
+        try {
+            new BankApp(main);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void initUserTable() {
@@ -41,6 +64,7 @@ public class LauncherController {
         userTable.setItems(userTableList);
     }
 
+
     private ObservableList<User> userTableList = FXCollections.observableArrayList();
 
     @FXML
@@ -49,7 +73,9 @@ public class LauncherController {
     @FXML
     private TableColumn<User, String> userTable_User;
 
-    private Main main;
-
     public static int port = 5050;
+
+    private ArrayList<User> connectedUserList;
+
+
 }

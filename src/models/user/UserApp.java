@@ -1,35 +1,35 @@
 package models.user;
 
-import controller.LauncherController;
-import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import models.user.controller.UserController;
 import models.user.logic.User;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
 
 public class UserApp extends Stage {
 
-    private UserApp() throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/models/user/view/UserView.fxml"));
+    public UserApp(User user) throws Exception {
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/models/user/view/UserView.fxml"));
+        loader.load();
+        Parent root = loader.getRoot();
+
+        UserController controller = loader.getController();
+
+        controller.setUser(user);
+        controller.updateUser();
+
+        controller.startUser();
+
         setTitle("334-User");
         setResizable(false);
         setScene(new Scene(root));
         sizeToScene();
         show();
+
     }
 
-    public static void launch() {
-        try {
-            new UserApp();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+
 
 }

@@ -11,9 +11,9 @@ public class Main {
 
     public Bank bank;
 
-    public Main(LauncherController appController) {
+    public Main(LauncherController launcherController) {
 
-        bank = new Bank(appController);
+        bank = new Bank(launcherController);
 
         User company = bank.createUser("Oğuzhan");
 

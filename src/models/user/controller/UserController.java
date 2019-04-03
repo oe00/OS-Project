@@ -5,49 +5,62 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import models.Main;
 import models.bank.logic.Account;
 import models.bank.logic.Transaction;
 import models.user.logic.User;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.concurrent.TimeUnit;
 
 public class UserController {
 
-    private Main main;
+    public User user;
 
-    private int currentDelayValue = 0;
+    private ObjectOutputStream toServer;
+    private ObjectInputStream fromServer;
 
-    private int delay4Demo = 2;
+    private Socket socket;
 
-    private DataOutputStream toServer;
-    private DataInputStream fromServer;
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 
     public void initialize() {
-        startUser();
+
+        initTransactionTable();
+        initPendingTable();
+    }
+
+    public void updateUser() {
+        usernameLabel.setText(user.getName());
     }
 
     public void startUser() {
-        try {
-            Socket socket = new Socket("localhost", LauncherController.port);
+        new Thread(() -> {
+            try {
+                socket = new Socket("localhost", LauncherController.port);
 
-            fromServer = new DataInputStream(socket.getInputStream());
-            toServer = new DataOutputStream(socket.getOutputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+                toServer = new ObjectOutputStream(socket.getOutputStream());
+                fromServer = new ObjectInputStream(socket.getInputStream());
+
+                toServer.writeObject(user);
+
+
+            } catch (IOException  e) {
+                e.printStackTrace();
+            }
+        }).start();
 
     }
 
 
     private void initTransactionTable() {
+
         transactionHistoryTable_ID.setCellValueFactory(cD -> cD.getValue().getIdSP());
         transactionHistoryTable_StartTime.setCellValueFactory(cD -> cD.getValue().getStartTimeSP());
-        transactionHistoryTable_Delay.setCellValueFactory(cD -> cD.getValue().getDelaySP());
         transactionHistoryTable_CompleteTime.setCellValueFactory(cD -> cD.getValue().getCompleteTimeSP());
         transactionHistoryTable_Account.setCellValueFactory(cD -> cD.getValue().getAccountSP());
         transactionHistoryTable_Amount.setCellValueFactory(cD -> cD.getValue().getAmountSP());
@@ -63,40 +76,18 @@ public class UserController {
 
         pendingTransactionsTable_ID.setCellValueFactory(cD -> cD.getValue().getIdSP());
         pendingTransactionsTable_StartTime.setCellValueFactory(cD -> cD.getValue().getStartTimeSP());
-        pendingTransactionsTable_Delay.setCellValueFactory(cD -> cD.getValue().getDelaySP());
-        pendingTransactionsTable_User.setCellValueFactory(cD -> cD.getValue().getUserSP());
         pendingTransactionsTable_Account.setCellValueFactory(cD -> cD.getValue().getAccountSP());
         pendingTransactionsTable_Type.setCellValueFactory(cD -> cD.getValue().getTypeSP());
         pendingTransactionsTable_Amount.setCellValueFactory(cD -> cD.getValue().getAmountSP());
         pendingTransactionsTable_Balance.setCellValueFactory(cD -> cD.getValue().getBalanceSP());
-        pendingTransactionsTable_Result.setCellValueFactory(cD -> cD.getValue().getStatusSP());
 
         pendingTransactionsTable.setItems(pendingTransactionsTableList);
     }
 
-    private void assignDelays() {
-        delay3sec.setOnAction(e -> currentDelayValue = 3);
-        delay5sec.setOnAction(e -> currentDelayValue = 5);
-        delay10sec.setOnAction(e -> currentDelayValue = 10);
-    }
-
-    private void clearDelayButtons() {
-        if (delayController.getSelectedToggle() != null) {
-            delayController.selectToggle(null);
-        }
-    }
-
-    private ObservableList<User> userTableList = FXCollections.observableArrayList();
     private ObservableList<Account> accountTableList = FXCollections.observableArrayList();
     private ObservableList<Transaction> transactionHistoryTableList = FXCollections.observableArrayList();
     private ObservableList<Transaction> pendingTransactionsTableList = FXCollections.observableArrayList();
 
-    public void updateUserList(User user) {
-
-        userTableList.add(user);
-        userTable.refresh();
-
-    }
 
     public void updateAccountList(Account account) {
 
@@ -104,12 +95,20 @@ public class UserController {
         accountTable.refresh();
     }
 
-    public void updateTransactionHistoryTableList(Transaction transaction) {
+    public void updateTransactionHistoryTableList() {
 
-        transactionHistoryTableList.add(transaction);
-        transactionHistoryTable.refresh();
+        try {
+            Transaction transaction = (Transaction) fromServer.readObject();
+            transactionHistoryTableList.add(transaction);
+            transactionHistoryTable.refresh();
 
-        accountTable.refresh();
+            accountTable.refresh();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
 
     }
 
@@ -124,14 +123,10 @@ public class UserController {
     }
 
     private boolean checkTransactionInput() {
-        User user = userTable.getSelectionModel().getSelectedItem();
 
         Account account = accountTable.getSelectionModel().getSelectedItem();
 
-        clearDelayButtons();
-
         try {
-            if (user == null) throw new Exception("Please Select UserApp");
             if (account == null) throw new Exception("Please Select Account");
 
         } catch (Exception e) {
@@ -152,50 +147,38 @@ public class UserController {
         return true;
     }
 
-    public void delayThread() {
-        int currentThreadDelay = currentDelayValue;
-        currentDelayValue = 0;
 
-        if (currentThreadDelay == 0) {
-            currentThreadDelay = delay4Demo;
-        }
-
-        try {
-            TimeUnit.SECONDS.sleep(currentThreadDelay);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void deposit() {
+    public void deposit() throws IOException {
 
         if (!checkTransactionInput()) {
             return;
         }
 
-        User user = userTable.getSelectionModel().getSelectedItem();
-
         Account account = accountTable.getSelectionModel().getSelectedItem();
 
         Double amountDouble = Double.parseDouble(amount.getText());
 
-        main.bank.deposit4Demo(account, user, amountDouble, currentDelayValue);
+        toServer.writeObject(account);
+        toServer.writeObject(amountDouble);
+        toServer.writeObject(this.user);
+        toServer.writeObject("Deposit");
 
     }
 
-    public void withdraw() {
+    public void withdraw() throws IOException {
 
         if (!checkTransactionInput()) {
             return;
         }
 
-        User user = userTable.getSelectionModel().getSelectedItem();
-
         Account account = accountTable.getSelectionModel().getSelectedItem();
 
         Double amountDouble = Double.parseDouble(amount.getText());
 
-        main.bank.withdraw4Demo(account, user, amountDouble, currentDelayValue);
+        toServer.writeObject(account);
+        toServer.writeObject(amountDouble);
+        toServer.writeObject(this.user);
+        toServer.writeObject("Withdraw");
 
     }
 
@@ -212,8 +195,6 @@ public class UserController {
     @FXML
     private TableColumn<Transaction, String> transactionHistoryTable_CompleteTime;
 
-    @FXML
-    private TableColumn<Transaction, String> transactionHistoryTable_Delay;
 
     @FXML
     private TableColumn<Transaction, String> transactionHistoryTable_User;
@@ -242,14 +223,6 @@ public class UserController {
     @FXML
     private Button withdrawButton;
 
-    @FXML
-    private RadioButton delay3sec;
-
-    @FXML
-    private RadioButton delay5sec;
-
-    @FXML
-    private RadioButton delay10sec;
 
     @FXML
     private TableView<Transaction> pendingTransactionsTable;
@@ -260,8 +233,6 @@ public class UserController {
     @FXML
     private TableColumn<Transaction, String> pendingTransactionsTable_StartTime;
 
-    @FXML
-    private TableColumn<Transaction, String> pendingTransactionsTable_User;
 
     @FXML
     private TableColumn<Transaction, String> pendingTransactionsTable_Account;
@@ -275,11 +246,6 @@ public class UserController {
     @FXML
     private TableColumn<Transaction, String> pendingTransactionsTable_Balance;
 
-    @FXML
-    private TableColumn<Transaction, String> pendingTransactionsTable_Result;
-
-    @FXML
-    private TableColumn<Transaction, String> pendingTransactionsTable_Delay;
 
     @FXML
     private TableView<Account> accountTable;
@@ -291,12 +257,7 @@ public class UserController {
     private TableColumn<Account, String> accountTable_Balance;
 
     @FXML
-    private TableView<User> userTable;
-
-    @FXML
-    private TableColumn<User, String> userTable_User;
-
-    private ToggleGroup delayController = new ToggleGroup();
+    private Label usernameLabel;
 
 
 }

@@ -10,37 +10,44 @@ import models.bank.logic.Account;
 import models.bank.logic.Transaction;
 import models.user.logic.User;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 public class BankController {
 
-    private Main main;
+    public Main main;
 
     private int currentDelayValue = 0;
 
     private int delay4Demo = 2;
 
+    ObjectInputStream inputFromClient;
+    ObjectOutputStream outputToClient;
+
+    ServerSocket serverSocket;
+
     public void initialize() {
-            startBank();
+
+        initTransactionTable();
+        initPendingTable();
+        initUserTable();
+    }
+
+    public void setMain(Main main) {
+        this.main = main;
     }
 
     public void startBank() {
         new Thread(() -> {
             try {
-                ServerSocket serverSocket = new ServerSocket(LauncherController.port);
+                serverSocket = new ServerSocket(LauncherController.port);
                 while (true) {
-                    // Listen for a new connection request
                     Socket socket = serverSocket.accept();
-
-                    InetAddress inetAddress = socket.getInetAddress();
-
-                    // Create a new thread for the connection
                     handleUser(socket);
                 }
             } catch (IOException e) {
@@ -50,27 +57,51 @@ public class BankController {
     }
 
     public void handleUser(Socket socket) {
+
         new Thread(() -> {
             try {
-                DataInputStream inputFromClient = new DataInputStream(socket.getInputStream());
-                DataOutputStream outputToClient = new DataOutputStream(socket.getOutputStream());
+
+                outputToClient = new ObjectOutputStream(socket.getOutputStream());
+                inputFromClient = new ObjectInputStream(socket.getInputStream());
+
+                User user = (User) inputFromClient.readObject();
+
+                updateUserList(user);
 
                 while (true) {
-                    String str1 = inputFromClient.readUTF();
-                    String str2 = str1.toUpperCase();
-                    outputToClient.writeChars(str2);
+
+                    Account account = (Account) inputFromClient.readObject();
+                    Double amountDouble = (Double) inputFromClient.readObject();
+                    String type = (String) inputFromClient.readObject();
+
+                    switch (type) {
+                        case "Deposit":
+                            deposit(account, user, amountDouble);
+                            break;
+                        case "Withdraw":
+                            withdraw(account, user, amountDouble);
+                            break;
+                    }
+
+
                 }
-            } catch (IOException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
         }).start();
+    }
+
+    private void initUserTable() {
+
+        userTable_User.setCellValueFactory(cD -> cD.getValue().getNameSP());
+        userTable.setItems(userTableList);
+
     }
 
 
     private void initTransactionTable() {
         transactionHistoryTable_ID.setCellValueFactory(cD -> cD.getValue().getIdSP());
         transactionHistoryTable_StartTime.setCellValueFactory(cD -> cD.getValue().getStartTimeSP());
-        transactionHistoryTable_Delay.setCellValueFactory(cD -> cD.getValue().getDelaySP());
         transactionHistoryTable_CompleteTime.setCellValueFactory(cD -> cD.getValue().getCompleteTimeSP());
         transactionHistoryTable_Account.setCellValueFactory(cD -> cD.getValue().getAccountSP());
         transactionHistoryTable_Amount.setCellValueFactory(cD -> cD.getValue().getAmountSP());
@@ -86,7 +117,6 @@ public class BankController {
 
         pendingTransactionsTable_ID.setCellValueFactory(cD -> cD.getValue().getIdSP());
         pendingTransactionsTable_StartTime.setCellValueFactory(cD -> cD.getValue().getStartTimeSP());
-        pendingTransactionsTable_Delay.setCellValueFactory(cD -> cD.getValue().getDelaySP());
         pendingTransactionsTable_User.setCellValueFactory(cD -> cD.getValue().getUserSP());
         pendingTransactionsTable_Account.setCellValueFactory(cD -> cD.getValue().getAccountSP());
         pendingTransactionsTable_Type.setCellValueFactory(cD -> cD.getValue().getTypeSP());
@@ -97,20 +127,8 @@ public class BankController {
         pendingTransactionsTable.setItems(pendingTransactionsTableList);
     }
 
-    private void assignDelays() {
-        delay3sec.setOnAction(e -> currentDelayValue = 3);
-        delay5sec.setOnAction(e -> currentDelayValue = 5);
-        delay10sec.setOnAction(e -> currentDelayValue = 10);
-    }
-
-    private void clearDelayButtons() {
-        if (delayController.getSelectedToggle() != null) {
-            delayController.selectToggle(null);
-        }
-    }
 
     private ObservableList<User> userTableList = FXCollections.observableArrayList();
-    private ObservableList<Account> accountTableList = FXCollections.observableArrayList();
     private ObservableList<Transaction> transactionHistoryTableList = FXCollections.observableArrayList();
     private ObservableList<Transaction> pendingTransactionsTableList = FXCollections.observableArrayList();
 
@@ -121,18 +139,16 @@ public class BankController {
 
     }
 
-    public void updateAccountList(Account account) {
-
-        accountTableList.add(account);
-        accountTable.refresh();
-    }
-
     public void updateTransactionHistoryTableList(Transaction transaction) {
 
         transactionHistoryTableList.add(transaction);
         transactionHistoryTable.refresh();
 
-        accountTable.refresh();
+        try {
+            outputToClient.writeObject(transaction);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -146,12 +162,7 @@ public class BankController {
         pendingTransactionsTable.refresh();
     }
 
-    private boolean checkTransactionInput() {
-        User user = userTable.getSelectionModel().getSelectedItem();
-
-        Account account = accountTable.getSelectionModel().getSelectedItem();
-
-        clearDelayButtons();
+    private boolean checkTransactionInput(Account account, User user, Double amountDouble) {
 
         try {
             if (user == null) throw new Exception("Please Select UserApp");
@@ -164,7 +175,6 @@ public class BankController {
         }
 
         try {
-            Double amountDouble = Double.parseDouble(amount.getText());
             if (amountDouble < 0) throw new Exception("Negative Input");
 
         } catch (Exception e) {
@@ -190,33 +200,21 @@ public class BankController {
         }
     }
 
-    public void deposit() {
+    public void deposit(Account account, User user, Double amountDouble) {
 
-        if (!checkTransactionInput()) {
+        if (!checkTransactionInput(account, user, amountDouble)) {
             return;
         }
-
-        User user = userTable.getSelectionModel().getSelectedItem();
-
-        Account account = accountTable.getSelectionModel().getSelectedItem();
-
-        Double amountDouble = Double.parseDouble(amount.getText());
 
         main.bank.deposit4Demo(account, user, amountDouble, currentDelayValue);
 
     }
 
-    public void withdraw() {
+    public void withdraw(Account account, User user, Double amountDouble) {
 
-        if (!checkTransactionInput()) {
+        if (!checkTransactionInput(account, user, amountDouble)) {
             return;
         }
-
-        User user = userTable.getSelectionModel().getSelectedItem();
-
-        Account account = accountTable.getSelectionModel().getSelectedItem();
-
-        Double amountDouble = Double.parseDouble(amount.getText());
 
         main.bank.withdraw4Demo(account, user, amountDouble, currentDelayValue);
 
@@ -235,8 +233,6 @@ public class BankController {
     @FXML
     private TableColumn<Transaction, String> transactionHistoryTable_CompleteTime;
 
-    @FXML
-    private TableColumn<Transaction, String> transactionHistoryTable_Delay;
 
     @FXML
     private TableColumn<Transaction, String> transactionHistoryTable_User;
@@ -266,15 +262,6 @@ public class BankController {
     private Button withdrawButton;
 
     @FXML
-    private RadioButton delay3sec;
-
-    @FXML
-    private RadioButton delay5sec;
-
-    @FXML
-    private RadioButton delay10sec;
-
-    @FXML
     private TableView<Transaction> pendingTransactionsTable;
 
     @FXML
@@ -302,24 +289,9 @@ public class BankController {
     private TableColumn<Transaction, String> pendingTransactionsTable_Result;
 
     @FXML
-    private TableColumn<Transaction, String> pendingTransactionsTable_Delay;
-
-    @FXML
-    private TableView<Account> accountTable;
-
-    @FXML
-    private TableColumn<Account, String> accountTable_Account;
-
-    @FXML
-    private TableColumn<Account, String> accountTable_Balance;
-
-    @FXML
     private TableView<User> userTable;
 
     @FXML
     private TableColumn<User, String> userTable_User;
-
-    private ToggleGroup delayController = new ToggleGroup();
-
 
 }

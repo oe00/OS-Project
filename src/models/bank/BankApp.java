@@ -4,11 +4,20 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import models.Main;
+import models.bank.controller.BankController;
 
 public class BankApp extends Stage {
 
-    private BankApp() throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/models/bank/view/BankView.fxml"));
+    public BankApp(Main main) throws Exception {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/models/bank/view/BankView.fxml"));
+        Parent root = loader.load();
+        BankController bankController = loader.getController();
+
+        bankController.setMain(main);
+
+        bankController.startBank();
+
         setTitle("334-Bank");
         setResizable(false);
         setScene(new Scene(root));
@@ -16,12 +25,5 @@ public class BankApp extends Stage {
         show();
     }
 
-    public static void launch(){
-        try {
-            new BankApp();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
 }

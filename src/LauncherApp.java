@@ -8,12 +8,16 @@ public class LauncherApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/view/LauncherView.fxml"));
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LauncherView.fxml"));
+        loader.load();
+        Parent root = loader.getRoot();
         primaryStage.setTitle("334-Launcher");
         primaryStage.setResizable(false);
         primaryStage.setScene(new Scene(root));
         primaryStage.sizeToScene();
         primaryStage.show();
+
     }
 
 

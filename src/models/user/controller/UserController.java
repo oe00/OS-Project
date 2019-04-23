@@ -43,6 +43,7 @@ public class UserController {
     }
 
     public void startUser() {
+
         new Thread(() -> {
             try {
                 socket = new Socket("localhost", LauncherController.port);
@@ -171,7 +172,7 @@ public class UserController {
     }
 
 
-    public void deposit() throws IOException {
+    public void deposit() {
 
         if (!checkTransactionInput()) {
             return;
@@ -196,8 +197,6 @@ public class UserController {
             addToTransactionHistoryTable();
 
             deleteFromPendingTransactionsTableList(mock_transaction);
-
-            updateAccountList();
 
         }).start();
 

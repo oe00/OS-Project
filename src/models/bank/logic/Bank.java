@@ -4,7 +4,6 @@ import controller.LauncherController;
 import models.bank.controller.BankController;
 import models.user.logic.User;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
@@ -171,7 +170,10 @@ public class Bank {
 
     public void deposit4Demo(Transaction mock_transaction) {
 
-        new Thread(() -> deposit(mock_transaction)).start();
+        //new Thread(() -> deposit(mock_transaction)).start();
+
+        deposit(mock_transaction);
+
 
     }
 

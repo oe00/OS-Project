@@ -21,14 +21,10 @@ import java.util.stream.Collectors;
 public class BankController {
 
     public Main main;
-    private User user;
 
     private int currentDelayValue = 0;
 
     private int delay4Demo = 2;
-
-    public ObjectInputStream inputFromClient;
-    public ObjectOutputStream outputToClient;
 
     ServerSocket serverSocket;
 
@@ -58,7 +54,7 @@ public class BankController {
     }
 
 
-    void sendAccounts() {
+    void sendAccounts(User user, ObjectOutputStream os) {
 
         List<Account> accounts = new ArrayList<>(main.bank.bankAccounts.values());
 
@@ -66,8 +62,7 @@ public class BankController {
                 .filter(a -> a.authenticatedUsers.contains(user.getID())).collect(Collectors.toList());
 
         try {
-            authenticated_accounts.get(0).updateBalance(-10000.0, 'D');
-            outputToClient.writeObject(authenticated_accounts);
+            os.writeObject(authenticated_accounts);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -78,33 +73,37 @@ public class BankController {
         new Thread(() -> {
             try {
 
-                outputToClient = new ObjectOutputStream(socket.getOutputStream());
-                inputFromClient = new ObjectInputStream(socket.getInputStream());
 
-                user = (User) inputFromClient.readObject();
+                ObjectOutputStream os = new ObjectOutputStream(socket.getOutputStream());
+                ObjectInputStream is = new ObjectInputStream(socket.getInputStream());
+
+                User user = (User) is.readObject();
 
                 updateUserList(user);
 
-                sendAccounts();
+                sendAccounts(user, os);
 
                 while (true) {
-                    Transaction mock_transaction = null;
+
                     try {
-                        mock_transaction = (Transaction) inputFromClient.readObject();
+
+                        Transaction mock_transaction = (Transaction) is.readObject();
+
+                        //addToPendingTransactionsTable(mock_transaction);
+
+                        switch (mock_transaction.getType()) {
+                            case "Deposit":
+                                deposit(mock_transaction, os);
+                                break;
+                            case "Withdraw":
+                                withdraw(mock_transaction, os);
+                                break;
+                        }
+
                     } catch (IOException | ClassNotFoundException e) {
                         e.printStackTrace();
                     }
 
-                    addToPendingTransactionsTable(mock_transaction);
-
-                    switch (mock_transaction.getType()) {
-                        case "Deposit":
-                            deposit(mock_transaction);
-                            break;
-                        case "Withdraw":
-                            withdraw(mock_transaction);
-                            break;
-                    }
                 }
 
             } catch (IOException | ClassNotFoundException e) {
@@ -216,22 +215,26 @@ public class BankController {
         }
     }
 
-    public void deposit(Transaction transaction) {
+    public void deposit(Transaction transaction, ObjectOutputStream os) {
 
-        main.bank.deposit4Demo(transaction);
+        new Thread(() -> {
 
-        deleteFromPendingTransactionsTable(transaction);
+            main.bank.deposit4Demo(transaction);
 
-        addToTransactionHistoryTable(transaction);
+            deleteFromPendingTransactionsTable(transaction);
 
-        try {
-            outputToClient.writeObject(transaction);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            addToTransactionHistoryTable(transaction);
+
+            try {
+                os.writeObject(transaction);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }).start();
     }
 
-    public void withdraw(Transaction transaction) {
+    public void withdraw(Transaction transaction, ObjectOutputStream os) {
 
         if (!checkTransactionInput(transaction.getAccount(), transaction.getUser(), transaction.getAmount())) {
             return;
@@ -244,12 +247,10 @@ public class BankController {
         addToTransactionHistoryTable(transaction);
 
         try {
-            outputToClient.writeObject(transaction);
+            os.writeObject(transaction);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        sendAccounts();
 
     }
 

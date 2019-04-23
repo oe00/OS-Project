@@ -54,7 +54,7 @@ public class BankController {
     }
 
 
-    void sendAccounts(User user, ObjectOutputStream os) {
+    public void sendAccounts(User user, ObjectOutputStream os) {
 
         List<Account> accounts = new ArrayList<>(main.bank.bankAccounts.values());
 
@@ -62,6 +62,7 @@ public class BankController {
                 .filter(a -> a.authenticatedUsers.contains(user.getID())).collect(Collectors.toList());
 
         try {
+
             os.writeObject(authenticated_accounts);
         } catch (IOException e) {
             e.printStackTrace();
@@ -223,7 +224,7 @@ public class BankController {
 
         new Thread(() -> {
 
-            main.bank.deposit(transaction);
+            main.bank.deposit(transaction,os);
 
             deleteFromPendingTransactionsTable(transaction);
 
@@ -234,6 +235,8 @@ public class BankController {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+            sendAccounts(transaction.getUser(),os);
 
         }).start();
     }
@@ -246,7 +249,7 @@ public class BankController {
 
         new Thread(() -> {
 
-            main.bank.withdraw(transaction);
+            main.bank.withdraw(transaction,os);
 
             deleteFromPendingTransactionsTable(transaction);
 

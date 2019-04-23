@@ -108,6 +108,7 @@ public class UserController {
         accountTableList.clear();
 
         try {
+
             ArrayList<Account> accounts = (ArrayList<Account>) fromServer.readObject();
 
             for (Account a : accounts) {
@@ -144,8 +145,6 @@ public class UserController {
     public void deleteFromPendingTransactionsTableList(Transaction transaction) {
         pendingTransactionsTableList.remove(transaction);
         pendingTransactionsTable.refresh();
-
-        accountTable.refresh();
     }
 
     private boolean checkTransactionInput() {
@@ -198,7 +197,10 @@ public class UserController {
 
             addToTransactionHistoryTable();
 
+            updateAccountList();
+
             deleteFromPendingTransactionsTableList(mock_transaction);
+
 
         }).start();
 

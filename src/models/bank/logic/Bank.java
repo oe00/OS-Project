@@ -4,6 +4,7 @@ import controller.LauncherController;
 import models.bank.controller.BankController;
 import models.user.logic.User;
 
+import java.io.ObjectOutputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
@@ -118,7 +119,7 @@ public class Bank {
      * the "mock_transaction".
      **/
 
-    public void withdraw(Transaction mock_transaction) {
+    public void withdraw(Transaction mock_transaction,ObjectOutputStream os) {
 
         Transaction transaction = mock_transaction;
 
@@ -140,6 +141,8 @@ public class Bank {
 
             transaction.completeSuccessful(transaction.getAccount(), transaction.getAmount(), requestTime);
 
+            this.bankController.sendAccounts(transaction.getUser(),os);
+
 
         } catch (Exception e) {
 
@@ -149,8 +152,6 @@ public class Bank {
         } finally {
 
             transaction.getAccount().transactions.add(transaction);
-
-
         }
 
     }
@@ -166,7 +167,7 @@ public class Bank {
      * the "mock_transaction".
      **/
 
-    public void deposit(Transaction mock_transaction) {
+    public void deposit(Transaction mock_transaction, ObjectOutputStream os) {
 
         Transaction transaction = mock_transaction;
 
@@ -180,7 +181,7 @@ public class Bank {
                 requestTime = new Date();
             }
 
-            transaction.getAccount().updateBalance(transaction.getAmount(), 'D');
+            this.bankAccounts.get(transaction.getAccount().uuid).updateBalance(transaction.getAmount(), 'D');
 
             transaction.completeSuccessful(transaction.getAccount(),transaction.getAmount(), requestTime);
 

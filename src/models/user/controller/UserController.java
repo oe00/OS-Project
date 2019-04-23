@@ -55,7 +55,7 @@ public class UserController {
 
                 updateAccountList();
 
-        } catch (IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }).start();
@@ -119,6 +119,9 @@ public class UserController {
         }
 
         accountTable.refresh();
+
+
+        accountTable.getSelectionModel().select(0);
     }
 
     public void addToTransactionHistoryTable() {
@@ -196,6 +199,8 @@ public class UserController {
             addToPendingTransactionsTableList(mock_transaction);
 
             addToTransactionHistoryTable();
+
+            System.out.println(mock_transaction.getAccount().getBalanceSP());
 
             updateAccountList();
 

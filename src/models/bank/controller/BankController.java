@@ -62,12 +62,13 @@ public class BankController {
                 .filter(a -> a.authenticatedUsers.contains(user.getID())).collect(Collectors.toList());
 
         try {
-
+            os.reset();
             os.writeObject(authenticated_accounts);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
 
     public void handleUser(Socket socket) {
 
@@ -216,6 +217,7 @@ public class BankController {
         }
     }
 
+
     public void deposit(Transaction transaction, ObjectOutputStream os) {
 
         if (!checkTransactionInput(transaction.getAccount(), transaction.getUser(), transaction.getAmount())) {
@@ -224,7 +226,7 @@ public class BankController {
 
         new Thread(() -> {
 
-            main.bank.deposit(transaction,os);
+            main.bank.deposit(transaction, os);
 
             deleteFromPendingTransactionsTable(transaction);
 
@@ -236,7 +238,7 @@ public class BankController {
                 e.printStackTrace();
             }
 
-            sendAccounts(transaction.getUser(),os);
+            sendAccounts(transaction.getUser(), os);
 
         }).start();
     }
@@ -249,7 +251,7 @@ public class BankController {
 
         new Thread(() -> {
 
-            main.bank.withdraw(transaction,os);
+            main.bank.withdraw(transaction, os);
 
             deleteFromPendingTransactionsTable(transaction);
 

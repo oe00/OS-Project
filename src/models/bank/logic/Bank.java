@@ -21,12 +21,13 @@ public class Bank {
         bankAccounts = new HashMap<>();
         bankUsers = new HashMap<>();
     }
+
     public Bank(LauncherController launcherController) {
         this();
         this.launcherController = launcherController;
     }
 
-    public void setController(BankController bc){
+    public void setController(BankController bc) {
         this.bankController = bc;
     }
 
@@ -119,7 +120,7 @@ public class Bank {
      * the "mock_transaction".
      **/
 
-    public void withdraw(Transaction mock_transaction,ObjectOutputStream os) {
+    public void withdraw(Transaction mock_transaction, ObjectOutputStream os) {
 
         Transaction transaction = mock_transaction;
 
@@ -141,7 +142,7 @@ public class Bank {
 
             transaction.completeSuccessful(transaction.getAccount(), transaction.getAmount(), requestTime);
 
-            this.bankController.sendAccounts(transaction.getUser(),os);
+            this.bankController.sendAccounts(transaction.getUser(), os);
 
 
         } catch (Exception e) {
@@ -167,7 +168,7 @@ public class Bank {
      * the "mock_transaction".
      **/
 
-    public void deposit(Transaction mock_transaction, ObjectOutputStream os) {
+    public Account deposit(Transaction mock_transaction, ObjectOutputStream os) {
 
         Transaction transaction = mock_transaction;
 
@@ -183,13 +184,15 @@ public class Bank {
 
             this.bankAccounts.get(transaction.getAccount().uuid).updateBalance(transaction.getAmount(), 'D');
 
-            transaction.completeSuccessful(transaction.getAccount(),transaction.getAmount(), requestTime);
+            transaction.completeSuccessful(this.bankAccounts.get(transaction.getAccount().uuid), transaction.getAmount(), requestTime);
 
         } catch (Exception ignored) {
 
         } finally {
 
             transaction.getAccount().transactions.add(transaction);
+
+            return transaction.getAccount();
 
         }
 

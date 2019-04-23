@@ -3,10 +3,13 @@ package controller;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import models.Main;
 import models.bank.BankApp;
+import models.bank.logic.Account;
 import models.user.UserApp;
 import models.user.logic.User;
 
@@ -15,6 +18,7 @@ import java.util.ArrayList;
 public class LauncherController {
 
     private Main main;
+    private User user;
 
     private boolean bankLaunched = false;
 
@@ -39,7 +43,12 @@ public class LauncherController {
     }
 
     public void launchUser() {
-        User user = userTable.getSelectionModel().getSelectedItem();
+
+        user = userTable.getSelectionModel().getSelectedItem();
+
+        if (!checkInput()) {
+            return;
+        }
 
         try {
             if (!connectedUserList.contains(user)) {
@@ -67,6 +76,30 @@ public class LauncherController {
         userTable_User.setCellValueFactory(cD -> cD.getValue().getNameSP());
 
         userTable.setItems(userTableList);
+    }
+
+
+    private boolean checkInput() {
+
+        try {
+            if (!bankLaunched) throw new Exception("Please Start Server (Bank) First");
+
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.OK);
+            alert.showAndWait();
+            return false;
+        }
+
+        try {
+            if (user == null) throw new Exception("Please Select User");
+
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.OK);
+            alert.showAndWait();
+            return false;
+        }
+
+        return true;
     }
 
 

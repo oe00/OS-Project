@@ -13,23 +13,20 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class UserController {
 
-    public User user;
+    private User user;
 
     private ObjectOutputStream toServer;
     private ObjectInputStream fromServer;
 
-    boolean safeStream = true;
-
     private Socket socket;
 
-    private int delay4Demo = 1;
+    private final int delay4Demo = 1;
 
 
     public void setUser(User user) {
@@ -103,12 +100,12 @@ public class UserController {
         pendingTransactionsTable.setItems(pendingTransactionsTableList);
     }
 
-    private ObservableList<Account> accountTableList = FXCollections.observableArrayList();
-    private ObservableList<Transaction> transactionHistoryTableList = FXCollections.observableArrayList();
-    private ObservableList<Transaction> pendingTransactionsTableList = FXCollections.observableArrayList();
+    private final ObservableList<Account> accountTableList = FXCollections.observableArrayList();
+    private final ObservableList<Transaction> transactionHistoryTableList = FXCollections.observableArrayList();
+    private final ObservableList<Transaction> pendingTransactionsTableList = FXCollections.observableArrayList();
 
 
-    public void updateAccountList() {
+    private void updateAccountList() {
 
         accountTableList.clear();
 
@@ -116,9 +113,7 @@ public class UserController {
 
             ArrayList<Account> accounts = (ArrayList<Account>) fromServer.readObject();
 
-            for (Account a : accounts) {
-                accountTableList.add(a);
-            }
+            accountTableList.addAll(accounts);
 
             accountTable.refresh();
             accountTable.getSelectionModel().select(0);
@@ -130,7 +125,7 @@ public class UserController {
 
     }
 
-    public void addToTransactionHistoryTable() {
+    private void addToTransactionHistoryTable() {
 
         try {
 
@@ -146,12 +141,12 @@ public class UserController {
 
     }
 
-    public void addToPendingTransactionsTableList(Transaction transaction) {
+    private void addToPendingTransactionsTableList(Transaction transaction) {
         pendingTransactionsTableList.add(transaction);
         pendingTransactionsTable.refresh();
     }
 
-    public void deleteFromPendingTransactionsTableList(Transaction transaction) {
+    private void deleteFromPendingTransactionsTableList(Transaction transaction) {
         pendingTransactionsTableList.remove(transaction);
         pendingTransactionsTable.refresh();
     }
@@ -165,7 +160,7 @@ public class UserController {
      * alternatively one can use synchronization instead of delay
      **/
 
-    void safeBuffer() {
+    private void safeBuffer() {
         try {
             TimeUnit.SECONDS.sleep(1);
         } catch (InterruptedException e) {
@@ -187,7 +182,7 @@ public class UserController {
         }
 
         try {
-            Double amountDouble = Double.parseDouble(amount.getText());
+            double amountDouble = Double.parseDouble(amount.getText());
             if (amountDouble < 0) throw new Exception("Negative Input");
 
         } catch (Exception e) {

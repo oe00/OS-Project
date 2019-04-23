@@ -16,9 +16,9 @@ public class User implements Serializable {
 
     private String name;
     final private UUID uuid;
-    public ArrayList<Account> ownedAccounts;
+    public final ArrayList<Account> ownedAccounts;
 
-    public User() {
+    private User() {
         uuid = UUID.randomUUID();
         ownedAccounts = new ArrayList<>();
     }

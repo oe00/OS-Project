@@ -20,11 +20,11 @@ import java.util.stream.Collectors;
 
 public class BankController {
 
-    public Main main;
+    private Main main;
 
     private int delay4Demo;
 
-    ServerSocket serverSocket;
+    private ServerSocket serverSocket;
 
     public void initialize() {
 
@@ -52,7 +52,7 @@ public class BankController {
     }
 
 
-    public void sendAccounts(User user, ObjectOutputStream os) {
+    private void sendAccounts(User user, ObjectOutputStream os) {
 
         List<Account> accounts = new ArrayList<>(main.bank.bankAccounts.values());
 
@@ -68,7 +68,7 @@ public class BankController {
     }
 
 
-    public void handleUser(Socket socket) {
+    private void handleUser(Socket socket) {
 
         new Thread(() -> {
             try {
@@ -149,29 +149,29 @@ public class BankController {
     }
 
 
-    private ObservableList<User> userTableList = FXCollections.observableArrayList();
-    private ObservableList<Transaction> transactionHistoryTableList = FXCollections.observableArrayList();
-    private ObservableList<Transaction> pendingTransactionsTableList = FXCollections.observableArrayList();
+    private final ObservableList<User> userTableList = FXCollections.observableArrayList();
+    private final ObservableList<Transaction> transactionHistoryTableList = FXCollections.observableArrayList();
+    private final ObservableList<Transaction> pendingTransactionsTableList = FXCollections.observableArrayList();
 
-    public void updateUserList(User user) {
+    private void updateUserList(User user) {
 
         userTableList.add(user);
         userTable.refresh();
 
     }
 
-    public void addToTransactionHistoryTable(Transaction transaction) {
+    private void addToTransactionHistoryTable(Transaction transaction) {
 
         transactionHistoryTableList.add(transaction);
         transactionHistoryTable.refresh();
     }
 
-    public void addToPendingTransactionsTable(Transaction transaction) {
+    private void addToPendingTransactionsTable(Transaction transaction) {
         pendingTransactionsTableList.add(transaction);
         pendingTransactionsTable.refresh();
     }
 
-    public void deleteFromPendingTransactionsTable(Transaction transaction) {
+    private void deleteFromPendingTransactionsTable(Transaction transaction) {
         pendingTransactionsTableList.remove(transaction);
         pendingTransactionsTable.refresh();
     }
@@ -209,7 +209,7 @@ public class BankController {
     }
 
 
-    public void deposit(Transaction transaction, ObjectOutputStream os) {
+    private void deposit(Transaction transaction, ObjectOutputStream os) {
 
         if (!checkTransactionInput(transaction.getAccount(), transaction.getUser(), transaction.getAmount())) {
             return;
@@ -236,7 +236,7 @@ public class BankController {
         }).start();
     }
 
-    public void withdraw(Transaction transaction, ObjectOutputStream os) {
+    private void withdraw(Transaction transaction, ObjectOutputStream os) {
 
         if (!checkTransactionInput(transaction.getAccount(), transaction.getUser(), transaction.getAmount())) {
             return;
@@ -292,15 +292,6 @@ public class BankController {
 
     @FXML
     private TableColumn<Transaction, String> transactionHistoryTable_Balance;
-
-    @FXML
-    private TextField amount;
-
-    @FXML
-    private Button depositButton;
-
-    @FXML
-    private Button withdrawButton;
 
     @FXML
     private TableView<Transaction> pendingTransactionsTable;

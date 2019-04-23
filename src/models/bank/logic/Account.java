@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public class Account implements Serializable {
     private String name;
-    final public UUID uuid;
+    final UUID uuid;
     private UUID accountOwner;
 
     public ArrayList<UUID> authenticatedUsers;

@@ -16,7 +16,7 @@ public class LauncherController {
 
     private Main main;
 
-    boolean bankLaunched = false;
+    private boolean bankLaunched = false;
 
     public void initialize() {
         initUserTable();
@@ -62,7 +62,7 @@ public class LauncherController {
         }
     }
 
-    public void initUserTable() {
+    private void initUserTable() {
 
         userTable_User.setCellValueFactory(cD -> cD.getValue().getNameSP());
 
@@ -70,7 +70,7 @@ public class LauncherController {
     }
 
 
-    private ObservableList<User> userTableList = FXCollections.observableArrayList();
+    private final ObservableList<User> userTableList = FXCollections.observableArrayList();
 
     @FXML
     private TableView<User> userTable;
@@ -78,7 +78,7 @@ public class LauncherController {
     @FXML
     private TableColumn<User, String> userTable_User;
 
-    public static int port = 5050;
+    public static final int port = 5050;
 
     private ArrayList<User> connectedUserList;
 

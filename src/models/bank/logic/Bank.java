@@ -4,7 +4,6 @@ import controller.LauncherController;
 import models.bank.controller.BankController;
 import models.user.logic.User;
 
-import java.io.ObjectOutputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
@@ -14,10 +13,10 @@ public class Bank {
     private BankController bankController;
     private LauncherController launcherController;
 
-    public HashMap<UUID, Account> bankAccounts;
-    private HashMap<UUID, User> bankUsers;
+    public final HashMap<UUID, Account> bankAccounts;
+    private final HashMap<UUID, User> bankUsers;
 
-    public Bank() {
+    private Bank() {
         bankAccounts = new HashMap<>();
         bankUsers = new HashMap<>();
     }
@@ -102,12 +101,6 @@ public class Bank {
         }
     }
 
-
-    /**
-     * withdraw4Demo() method, instantiates a Thread in order to not freeze UI, it generates a mock transaction
-     * which is added to "Pending Transactions" table for demonstrating that the
-     * transaction is running in the background.
-     */
 
     /** sync **/
 

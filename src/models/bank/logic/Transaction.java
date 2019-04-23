@@ -12,14 +12,14 @@ import java.util.UUID;
 
 public class Transaction implements Serializable {
 
-    private static SimpleDateFormat date_format = new SimpleDateFormat("HH:mm:ss.SSS");
+    private static final SimpleDateFormat date_format = new SimpleDateFormat("HH:mm:ss.SSS");
 
     private String completeTime;
     private String startTime;
     private String delayTime;
     private Integer delay;
 
-    private String transactionUUID;
+    private final String transactionUUID;
 
     private Account account;
     private User user;
@@ -38,7 +38,7 @@ public class Transaction implements Serializable {
         transactionUUID = UUID.randomUUID().toString();
     }
 
-    public Transaction(Account account, User user, Double amount, String type, int delay) {
+    private Transaction(Account account, User user, Double amount, String type, int delay) {
         this();
         this.account = account;
         this.user = user;
@@ -82,10 +82,6 @@ public class Transaction implements Serializable {
 
     public StringProperty getStartTimeSP() {
         return new SimpleStringProperty(startTime);
-    }
-
-    public StringProperty getDelaySP() {
-        return new SimpleStringProperty(delayTime);
     }
 
     public StringProperty getCompleteTimeSP() {

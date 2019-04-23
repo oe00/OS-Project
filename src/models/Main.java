@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class Main {
 
-    public Bank bank;
+    public final Bank bank;
 
     public void setBankController(BankController bankController) {
         bank.setController(bankController);

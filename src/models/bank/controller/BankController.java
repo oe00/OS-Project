@@ -89,7 +89,7 @@ public class BankController {
 
                         Transaction mock_transaction = (Transaction) is.readObject();
 
-                        //addToPendingTransactionsTable(mock_transaction);
+                        addToPendingTransactionsTable(mock_transaction);
 
                         switch (mock_transaction.getType()) {
                             case "Deposit":
@@ -217,9 +217,13 @@ public class BankController {
 
     public void deposit(Transaction transaction, ObjectOutputStream os) {
 
+        if (!checkTransactionInput(transaction.getAccount(), transaction.getUser(), transaction.getAmount())) {
+            return;
+        }
+
         new Thread(() -> {
 
-            main.bank.deposit4Demo(transaction);
+            main.bank.deposit(transaction);
 
             deleteFromPendingTransactionsTable(transaction);
 
@@ -240,18 +244,21 @@ public class BankController {
             return;
         }
 
-        //main.bank.withdraw4Demo();
+        new Thread(() -> {
 
-        deleteFromPendingTransactionsTable(transaction);
+            main.bank.withdraw(transaction);
 
-        addToTransactionHistoryTable(transaction);
+            deleteFromPendingTransactionsTable(transaction);
 
-        try {
-            os.writeObject(transaction);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            addToTransactionHistoryTable(transaction);
 
+            try {
+                os.writeObject(transaction);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }).start();
     }
 
 

@@ -106,14 +106,6 @@ public class Bank {
      * which is added to "Pending Transactions" table for demonstrating that the
      * transaction is running in the background.
      */
-    public void withdraw4Demo(Transaction mock_transaction) {
-
-        new Thread(() -> {
-
-                //withdraw(mock_transaction);
-
-        }).start();
-    }
 
     /** sync **/
 
@@ -126,7 +118,7 @@ public class Bank {
      * the "mock_transaction".
      **/
 
-    private void withdraw(Account account, User user, Double amount, int delay, Transaction mock_transaction) {
+    public void withdraw(Transaction mock_transaction) {
 
         Transaction transaction = mock_transaction;
 
@@ -134,46 +126,32 @@ public class Bank {
 
         try {
 
-            checkTransactionPermission(account, user);
-
-            account.checkLimit(amount);
-
-            //launcherController.delayThread();
-
-            account.updateBalance(amount, 'W');
-
-            if (delay != 0) {
+            if (transaction.getDelay() != 0) {
                 requestTime = new Date();
             }
 
-            transaction.completeSuccessful(account, amount, requestTime);
+            checkTransactionPermission(transaction.getAccount(), transaction.getUser());
+
+            transaction.getAccount().checkLimit(transaction.getAmount());
+
+            //launcherController.delayThread();
+
+            transaction.getAccount().updateBalance(transaction.getAmount(), 'W');
+
+            transaction.completeSuccessful(transaction.getAccount(), transaction.getAmount(), requestTime);
 
 
         } catch (Exception e) {
 
-            if (delay != 0) {
-                requestTime = new Date();
-            }
-
-            transaction.completeFail(account, amount, requestTime);
+            transaction.completeFail(transaction.getAccount(), transaction.getAmount(), requestTime);
 
 
         } finally {
 
-            account.transactions.add(transaction);
+            transaction.getAccount().transactions.add(transaction);
 
 
         }
-
-    }
-
-
-    public void deposit4Demo(Transaction mock_transaction) {
-
-        //new Thread(() -> deposit(mock_transaction)).start();
-
-        deposit(mock_transaction);
-
 
     }
 
@@ -188,7 +166,7 @@ public class Bank {
      * the "mock_transaction".
      **/
 
-    private void deposit(Transaction mock_transaction) {
+    public void deposit(Transaction mock_transaction) {
 
         Transaction transaction = mock_transaction;
 

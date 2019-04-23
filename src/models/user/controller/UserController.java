@@ -144,6 +144,8 @@ public class UserController {
     public void deleteFromPendingTransactionsTableList(Transaction transaction) {
         pendingTransactionsTableList.remove(transaction);
         pendingTransactionsTable.refresh();
+
+        accountTable.refresh();
     }
 
     private boolean checkTransactionInput() {

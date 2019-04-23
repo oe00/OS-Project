@@ -33,10 +33,6 @@ public class Transaction implements Serializable {
     private String type;
     private String status;
 
-
-    public void test_me(Double amount){
-        this.amount = amount;
-    }
     private Transaction() {
         completeTime = date_format.format(new Date());
         transactionUUID = UUID.randomUUID().toString();
@@ -49,7 +45,14 @@ public class Transaction implements Serializable {
         this.amount = amount;
         this.type = type;
         balanceAfterTransaction = account.getBalance();
-        status = "Completed";
+
+
+        if (account.getBalance() - amount < 0) {
+            status = "Failed";
+        } else {
+            status = "Completed";
+        }
+
 
         this.delay = delay;
 
@@ -63,12 +66,6 @@ public class Transaction implements Serializable {
     public Transaction(Account account, User user, Double amount, String type, Date startTime, int delay) {
         this(account, user, amount, type, delay);
         this.startTime = date_format.format(startTime);
-    }
-
-    Transaction(Account account, User user, Double amount, String type, Date startTime, String status, int delay) {
-        this(account, user, amount, type, startTime, delay);
-        balanceAfterTransaction = account.getBalance();
-        this.status = status;
     }
 
     public StringProperty getIdSP() {
@@ -125,10 +122,6 @@ public class Transaction implements Serializable {
 
     public Double getAmount() {
         return amount;
-    }
-
-    public Double getBalanceAfterTransaction() {
-        return balanceAfterTransaction;
     }
 
     void completeSuccessful(Account account, Double newAmount, Date newDate) {

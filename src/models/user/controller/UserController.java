@@ -16,6 +16,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class UserController {
 
@@ -24,7 +25,11 @@ public class UserController {
     private ObjectOutputStream toServer;
     private ObjectInputStream fromServer;
 
+    boolean safeStream = true;
+
     private Socket socket;
+
+    private int delay4Demo = 1;
 
 
     public void setUser(User user) {
@@ -114,14 +119,15 @@ public class UserController {
             for (Account a : accounts) {
                 accountTableList.add(a);
             }
-        } catch (IOException | ClassNotFoundException e) {
+
+            accountTable.refresh();
+            accountTable.getSelectionModel().select(0);
+
+        } catch (IOException |
+                ClassNotFoundException e) {
             e.printStackTrace();
         }
 
-        accountTable.refresh();
-
-
-        accountTable.getSelectionModel().select(0);
     }
 
     public void addToTransactionHistoryTable() {
@@ -148,6 +154,23 @@ public class UserController {
     public void deleteFromPendingTransactionsTableList(Transaction transaction) {
         pendingTransactionsTableList.remove(transaction);
         pendingTransactionsTable.refresh();
+    }
+
+
+    /**
+     * intentional delay for StreamCorruptedException
+     * when user sends transaction requests concurrently,
+     * order of input/output through object stream is corrupted because same i/o stream is used,
+     * however if we wait until i/o for transaction is complete, no such exception occurs,
+     * alternatively one can use synchronization instead of delay
+     **/
+
+    void safeBuffer() {
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private boolean checkTransactionInput() {
@@ -188,7 +211,9 @@ public class UserController {
 
             Double amountDouble = Double.parseDouble(amount.getText());
 
-            Transaction mock_transaction = new Transaction(account, this.user, amountDouble, "Deposit", new Date(), 0);
+            Transaction mock_transaction = new Transaction(account, this.user, amountDouble, "Deposit", new Date(), delay4Demo);
+
+            addToPendingTransactionsTableList(mock_transaction);
 
             try {
                 toServer.writeObject(mock_transaction);
@@ -196,43 +221,49 @@ public class UserController {
                 e.printStackTrace();
             }
 
-            addToPendingTransactionsTableList(mock_transaction);
+            safeBuffer();
 
             addToTransactionHistoryTable();
 
-            System.out.println(mock_transaction.getAccount().getBalanceSP());
-
-            updateAccountList();
-
             deleteFromPendingTransactionsTableList(mock_transaction);
 
+            updateAccountList();
 
         }).start();
 
     }
 
-    public void withdraw() throws IOException {
+    public void withdraw() {
 
         if (!checkTransactionInput()) {
             return;
         }
 
-        Account account = accountTable.getSelectionModel().getSelectedItem();
+        new Thread(() -> {
 
-        Double amountDouble = Double.parseDouble(amount.getText());
+            Account account = accountTable.getSelectionModel().getSelectedItem();
 
-        Transaction mock_transaction = new Transaction(account, this.user, amountDouble, "Withdraw", new Date(), 0);
+            Double amountDouble = Double.parseDouble(amount.getText());
 
-        toServer.writeObject(mock_transaction);
+            Transaction mock_transaction = new Transaction(account, this.user, amountDouble, "Withdraw", new Date(), delay4Demo);
 
-        addToPendingTransactionsTableList(mock_transaction);
+            addToPendingTransactionsTableList(mock_transaction);
 
-        deleteFromPendingTransactionsTableList(mock_transaction);
+            try {
+                toServer.writeObject(mock_transaction);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-        addToTransactionHistoryTable();
+            safeBuffer();
 
-        updateAccountList();
+            addToTransactionHistoryTable();
 
+            deleteFromPendingTransactionsTableList(mock_transaction);
+
+            updateAccountList();
+
+        }).start();
     }
 
 

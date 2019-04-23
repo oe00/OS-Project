@@ -22,9 +22,7 @@ public class BankController {
 
     public Main main;
 
-    private int currentDelayValue = 0;
-
-    private int delay4Demo = 2;
+    private int delay4Demo;
 
     ServerSocket serverSocket;
 
@@ -203,15 +201,8 @@ public class BankController {
 
     public void delayThread() {
 
-        int currentThreadDelay = currentDelayValue;
-        currentDelayValue = 0;
-
-        if (currentThreadDelay == 0) {
-            currentThreadDelay = delay4Demo;
-        }
-
         try {
-            TimeUnit.SECONDS.sleep(currentThreadDelay);
+            TimeUnit.SECONDS.sleep(delay4Demo);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -226,17 +217,19 @@ public class BankController {
 
         new Thread(() -> {
 
-            main.bank.deposit(transaction, os);
+            delay4Demo = transaction.getDelay();
 
-            deleteFromPendingTransactionsTable(transaction);
-
-            addToTransactionHistoryTable(transaction);
+            main.bank.deposit(transaction);
 
             try {
                 os.writeObject(transaction);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+            deleteFromPendingTransactionsTable(transaction);
+
+            addToTransactionHistoryTable(transaction);
 
             sendAccounts(transaction.getUser(), os);
 
@@ -251,17 +244,19 @@ public class BankController {
 
         new Thread(() -> {
 
-            main.bank.withdraw(transaction, os);
+            delay4Demo = transaction.getDelay();
 
-            deleteFromPendingTransactionsTable(transaction);
-
-            addToTransactionHistoryTable(transaction);
+            main.bank.withdraw(transaction);
 
             try {
                 os.writeObject(transaction);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+            addToTransactionHistoryTable(transaction);
+
+            sendAccounts(transaction.getUser(), os);
 
         }).start();
     }

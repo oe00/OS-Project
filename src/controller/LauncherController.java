@@ -16,6 +16,8 @@ public class LauncherController {
 
     private Main main;
 
+    boolean bankLaunched = false;
+
     public void initialize() {
         initUserTable();
 
@@ -40,7 +42,7 @@ public class LauncherController {
         User user = userTable.getSelectionModel().getSelectedItem();
 
         try {
-            if(!connectedUserList.contains(user)) {
+            if (!connectedUserList.contains(user)) {
                 connectedUserList.add(user);
                 new UserApp(user);
             }
@@ -51,7 +53,10 @@ public class LauncherController {
 
     public void launchBank() {
         try {
-            new BankApp(main);
+            if (!bankLaunched) {
+                bankLaunched = true;
+                new BankApp(main);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

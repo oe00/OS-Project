@@ -120,7 +120,7 @@ public class Bank {
      * the "mock_transaction".
      **/
 
-    public void withdraw(Transaction mock_transaction, ObjectOutputStream os) {
+    public void withdraw(Transaction mock_transaction) {
 
         Transaction transaction = mock_transaction;
 
@@ -128,27 +128,30 @@ public class Bank {
 
         try {
 
+            checkTransactionPermission(transaction.getAccount(), transaction.getUser());
+
+            this.bankAccounts.get(transaction.getAccount().uuid).checkLimit(transaction.getAmount());
+
+            bankController.delayThread();
+
             if (transaction.getDelay() != 0) {
                 requestTime = new Date();
             }
 
-            checkTransactionPermission(transaction.getAccount(), transaction.getUser());
+            this.bankAccounts.get(transaction.getAccount().uuid).updateBalance(transaction.getAmount(), 'W');
 
-            transaction.getAccount().checkLimit(transaction.getAmount());
-
-            //launcherController.delayThread();
-
-            transaction.getAccount().updateBalance(transaction.getAmount(), 'W');
-
-            transaction.completeSuccessful(transaction.getAccount(), transaction.getAmount(), requestTime);
-
-            this.bankController.sendAccounts(transaction.getUser(), os);
+            transaction.completeSuccessful(this.bankAccounts.get(transaction.getAccount().uuid), transaction.getAmount(), requestTime);
 
 
         } catch (Exception e) {
 
-            transaction.completeFail(transaction.getAccount(), transaction.getAmount(), requestTime);
+            bankController.delayThread();
 
+            if (transaction.getDelay() != 0) {
+                requestTime = new Date();
+            }
+
+            transaction.completeFail(this.bankAccounts.get(transaction.getAccount().uuid), transaction.getAmount(), requestTime);
 
         } finally {
 
@@ -168,7 +171,7 @@ public class Bank {
      * the "mock_transaction".
      **/
 
-    public Account deposit(Transaction mock_transaction, ObjectOutputStream os) {
+    public void deposit(Transaction mock_transaction) {
 
         Transaction transaction = mock_transaction;
 
@@ -176,7 +179,7 @@ public class Bank {
 
         try {
 
-            //launcherController.delayThread();
+            bankController.delayThread();
 
             if (transaction.getDelay() != 0) {
                 requestTime = new Date();
@@ -191,8 +194,6 @@ public class Bank {
         } finally {
 
             transaction.getAccount().transactions.add(transaction);
-
-            return transaction.getAccount();
 
         }
 

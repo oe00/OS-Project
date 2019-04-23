@@ -17,29 +17,41 @@ public class Transaction implements Serializable {
     private String completeTime;
     private String startTime;
     private String delayTime;
+    private Integer delay;
 
-    private String account;
-    private String user;
-    private String amount;
-    private String balanceAfterTransaction;
-    private String type;
-    private String status;
     private String transactionUUID;
 
+    private Account account;
+    private User user;
+    private Double amount;
+    private Double balanceAfterTransaction;
 
+    public String getType() {
+        return type;
+    }
+
+    private String type;
+    private String status;
+
+
+    public void test_me(Double amount){
+        this.amount = amount;
+    }
     private Transaction() {
         completeTime = date_format.format(new Date());
         transactionUUID = UUID.randomUUID().toString();
     }
 
-    private Transaction(Account account, User user, Double amount, String type, int delay) {
+    public Transaction(Account account, User user, Double amount, String type, int delay) {
         this();
-        this.account = account.getName();
-        this.user = user.getName();
-        this.amount = amount.toString();
+        this.account = account;
+        this.user = user;
+        this.amount = amount;
         this.type = type;
-        balanceAfterTransaction = account.getBalance().toString();
+        balanceAfterTransaction = account.getBalance();
         status = "Completed";
+
+        this.delay = delay;
 
         if (delay != 0)
             this.delayTime = delay + " Second";
@@ -48,14 +60,14 @@ public class Transaction implements Serializable {
         }
     }
 
-    Transaction(Account account, User user, Double amount, String type, Date startTime, int delay) {
+    public Transaction(Account account, User user, Double amount, String type, Date startTime, int delay) {
         this(account, user, amount, type, delay);
         this.startTime = date_format.format(startTime);
     }
 
     Transaction(Account account, User user, Double amount, String type, Date startTime, String status, int delay) {
         this(account, user, amount, type, startTime, delay);
-        balanceAfterTransaction = account.getBalance().toString();
+        balanceAfterTransaction = account.getBalance();
         this.status = status;
     }
 
@@ -64,7 +76,7 @@ public class Transaction implements Serializable {
     }
 
     public StringProperty getAccountSP() {
-        return new SimpleStringProperty(account);
+        return new SimpleStringProperty(account.getName());
     }
 
     public StringProperty getBalanceSP() {
@@ -96,12 +108,32 @@ public class Transaction implements Serializable {
     }
 
     public StringProperty getUserSP() {
-        return new SimpleStringProperty(user);
+        return new SimpleStringProperty(user.getName());
+    }
+
+    public Integer getDelay() {
+        return delay;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public Double getAmount() {
+        return amount;
+    }
+
+    public Double getBalanceAfterTransaction() {
+        return balanceAfterTransaction;
     }
 
     void completeSuccessful(Account account, Double newAmount, Date newDate) {
-        amount = newAmount.toString();
-        balanceAfterTransaction = account.getBalance().toString();
+        amount = newAmount;
+        balanceAfterTransaction = account.getBalance();
         completeTime = date_format.format(newDate);
         this.status = "Completed";
     }

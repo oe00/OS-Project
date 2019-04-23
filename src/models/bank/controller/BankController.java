@@ -11,24 +11,24 @@ import models.bank.logic.Transaction;
 import models.user.logic.User;
 
 import java.io.*;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class BankController {
 
     public Main main;
+    private User user;
 
     private int currentDelayValue = 0;
 
     private int delay4Demo = 2;
 
-    ObjectInputStream inputFromClient;
-    ObjectOutputStream outputToClient;
+    public ObjectInputStream inputFromClient;
+    public ObjectOutputStream outputToClient;
 
     ServerSocket serverSocket;
 
@@ -57,6 +57,22 @@ public class BankController {
         }).start();
     }
 
+
+    void sendAccounts() {
+
+        List<Account> accounts = new ArrayList<>(main.bank.bankAccounts.values());
+
+        List<Account> authenticated_accounts = accounts.stream()
+                .filter(a -> a.authenticatedUsers.contains(user.getID())).collect(Collectors.toList());
+
+        try {
+            authenticated_accounts.get(0).updateBalance(-10000.0, 'D');
+            outputToClient.writeObject(authenticated_accounts);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void handleUser(Socket socket) {
 
         new Thread(() -> {
@@ -65,35 +81,32 @@ public class BankController {
                 outputToClient = new ObjectOutputStream(socket.getOutputStream());
                 inputFromClient = new ObjectInputStream(socket.getInputStream());
 
-                User user = (User) inputFromClient.readObject();
+                user = (User) inputFromClient.readObject();
 
                 updateUserList(user);
 
-                List<Account> accounts = new ArrayList<>(main.bank.bankAccounts.values());
-
-                for(Account a:accounts){
-                    if(a.authenticatedUsers.contains(user.getID())){
-                        outputToClient.writeObject(a);
-                    }
-                }
+                sendAccounts();
 
                 while (true) {
-
-                    Account account = (Account) inputFromClient.readObject();
-                    Double amountDouble = (Double) inputFromClient.readObject();
-                    String type = (String) inputFromClient.readObject();
-
-                    switch (type) {
-                        case "Deposit":
-                            deposit(account, user, amountDouble);
-                            break;
-                        case "Withdraw":
-                            withdraw(account, user, amountDouble);
-                            break;
+                    Transaction mock_transaction = null;
+                    try {
+                        mock_transaction = (Transaction) inputFromClient.readObject();
+                    } catch (IOException | ClassNotFoundException e) {
+                        e.printStackTrace();
                     }
 
+                    addToPendingTransactionsTable(mock_transaction);
 
+                    switch (mock_transaction.getType()) {
+                        case "Deposit":
+                            deposit(mock_transaction);
+                            break;
+                        case "Withdraw":
+                            withdraw(mock_transaction);
+                            break;
+                    }
                 }
+
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
@@ -148,25 +161,18 @@ public class BankController {
 
     }
 
-    public void updateTransactionHistoryTableList(Transaction transaction) {
+    public void addToTransactionHistoryTable(Transaction transaction) {
 
         transactionHistoryTableList.add(transaction);
         transactionHistoryTable.refresh();
-
-        try {
-            outputToClient.writeObject(transaction);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
     }
 
-    public void addToPendingTransactionsTableList(Transaction transaction) {
+    public void addToPendingTransactionsTable(Transaction transaction) {
         pendingTransactionsTableList.add(transaction);
         pendingTransactionsTable.refresh();
     }
 
-    public void deleteFromPendingTransactionsTableList(Transaction transaction) {
+    public void deleteFromPendingTransactionsTable(Transaction transaction) {
         pendingTransactionsTableList.remove(transaction);
         pendingTransactionsTable.refresh();
     }
@@ -195,6 +201,7 @@ public class BankController {
     }
 
     public void delayThread() {
+
         int currentThreadDelay = currentDelayValue;
         currentDelayValue = 0;
 
@@ -209,23 +216,40 @@ public class BankController {
         }
     }
 
-    public void deposit(Account account, User user, Double amountDouble) {
+    public void deposit(Transaction transaction) {
 
-        if (!checkTransactionInput(account, user, amountDouble)) {
-            return;
+        main.bank.deposit4Demo(transaction);
+
+        deleteFromPendingTransactionsTable(transaction);
+
+        addToTransactionHistoryTable(transaction);
+
+        try {
+            outputToClient.writeObject(transaction);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-        main.bank.deposit4Demo(account, user, amountDouble, currentDelayValue);
-
     }
 
-    public void withdraw(Account account, User user, Double amountDouble) {
+    public void withdraw(Transaction transaction) {
 
-        if (!checkTransactionInput(account, user, amountDouble)) {
+        if (!checkTransactionInput(transaction.getAccount(), transaction.getUser(), transaction.getAmount())) {
             return;
         }
 
-        main.bank.withdraw4Demo(account, user, amountDouble, currentDelayValue);
+        //main.bank.withdraw4Demo();
+
+        deleteFromPendingTransactionsTable(transaction);
+
+        addToTransactionHistoryTable(transaction);
+
+        try {
+            outputToClient.writeObject(transaction);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        sendAccounts();
 
     }
 

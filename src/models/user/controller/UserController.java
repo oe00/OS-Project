@@ -13,6 +13,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Date;
 
 public class UserController {
 
@@ -49,17 +52,9 @@ public class UserController {
 
                 toServer.writeObject(user);
 
-                while(true){
-                    try {
-                        Account account = (Account) fromServer.readObject();
-                        updateAccountList(account);
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                }
+                updateAccountList();
 
-
-            } catch (IOException  e) {
+        } catch (IOException e) {
                 e.printStackTrace();
             }
         }).start();
@@ -107,23 +102,33 @@ public class UserController {
     private ObservableList<Transaction> pendingTransactionsTableList = FXCollections.observableArrayList();
 
 
-    public void updateAccountList(Account account) {
+    public void updateAccountList() {
 
-        accountTableList.add(account);
+        accountTableList.clear();
+
+        try {
+            ArrayList<Account> accounts = (ArrayList<Account>) fromServer.readObject();
+
+            for (Account a : accounts) {
+                accountTableList.add(a);
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
         accountTable.refresh();
     }
 
-    public void updateTransactionHistoryTableList() {
+    public void addToTransactionHistoryTable() {
 
         try {
+
             Transaction transaction = (Transaction) fromServer.readObject();
+
             transactionHistoryTableList.add(transaction);
             transactionHistoryTable.refresh();
 
-            accountTable.refresh();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
 
@@ -172,13 +177,29 @@ public class UserController {
             return;
         }
 
-        Account account = accountTable.getSelectionModel().getSelectedItem();
+        new Thread(() -> {
 
-        Double amountDouble = Double.parseDouble(amount.getText());
+            Account account = accountTable.getSelectionModel().getSelectedItem();
 
-        toServer.writeObject(account);
-        toServer.writeObject(amountDouble);
-        toServer.writeObject("Deposit");
+            Double amountDouble = Double.parseDouble(amount.getText());
+
+            Transaction mock_transaction = new Transaction(account, this.user, amountDouble, "Deposit", new Date(), 0);
+
+            try {
+                toServer.writeObject(mock_transaction);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            addToPendingTransactionsTableList(mock_transaction);
+
+            addToTransactionHistoryTable();
+
+            deleteFromPendingTransactionsTableList(mock_transaction);
+
+            updateAccountList();
+
+        }).start();
 
     }
 
@@ -192,9 +213,17 @@ public class UserController {
 
         Double amountDouble = Double.parseDouble(amount.getText());
 
-        toServer.writeObject(account);
-        toServer.writeObject(amountDouble);
-        toServer.writeObject("Withdraw");
+        Transaction mock_transaction = new Transaction(account, this.user, amountDouble, "Withdraw", new Date(), 0);
+
+        toServer.writeObject(mock_transaction);
+
+        addToPendingTransactionsTableList(mock_transaction);
+
+        deleteFromPendingTransactionsTableList(mock_transaction);
+
+        addToTransactionHistoryTable();
+
+        updateAccountList();
 
     }
 

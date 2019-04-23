@@ -1,14 +1,17 @@
 package models.bank.logic;
 
 import controller.LauncherController;
+import models.bank.controller.BankController;
 import models.user.logic.User;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
 public class Bank {
 
+    private BankController bankController;
     private LauncherController launcherController;
 
     public HashMap<UUID, Account> bankAccounts;
@@ -18,10 +21,13 @@ public class Bank {
         bankAccounts = new HashMap<>();
         bankUsers = new HashMap<>();
     }
-
     public Bank(LauncherController launcherController) {
         this();
         this.launcherController = launcherController;
+    }
+
+    public void setController(BankController bc){
+        this.bankController = bc;
     }
 
     public Account createAccount(User user, String accountName) {
@@ -41,7 +47,6 @@ public class Bank {
         User user = new User(name);
         bankUsers.put(user.getID(), user);
 
-        //bankController.updateUserList(user);
         launcherController.updateUserList(user);
         return user;
     }
@@ -102,29 +107,11 @@ public class Bank {
      * which is added to "Pending Transactions" table for demonstrating that the
      * transaction is running in the background.
      */
-    public void withdraw4Demo(Account account, User user, Double amount, int delay) {
+    public void withdraw4Demo(Transaction mock_transaction) {
 
         new Thread(() -> {
 
-            Transaction transaction = null;
-
-            Date requestTime = new Date();
-
-            try {
-                checkTransactionPermission(account, user);
-
-                account.checkLimit(amount);
-
-                transaction = new Transaction(account, user, amount, "Withdraw", requestTime, delay);
-
-            } catch (Exception e) {
-                transaction = new Transaction(account, user, amount, "Withdraw", requestTime, e.getMessage(), delay);
-
-            } finally {
-                //bankController.addToPendingTransactionsTableList(transaction);
-
-                withdraw(account, user, amount, delay, transaction);
-            }
+                //withdraw(mock_transaction);
 
         }).start();
     }
@@ -152,7 +139,7 @@ public class Bank {
 
             account.checkLimit(amount);
 
-            //bankController.delayThread();
+            //launcherController.delayThread();
 
             account.updateBalance(amount, 'W');
 
@@ -165,8 +152,6 @@ public class Bank {
 
         } catch (Exception e) {
 
-            //bankController.delayThread();
-
             if (delay != 0) {
                 requestTime = new Date();
             }
@@ -178,38 +163,15 @@ public class Bank {
 
             account.transactions.add(transaction);
 
-            //bankController.deleteFromPendingTransactionsTableList(transaction);
-
-            //bankController.updateTransactionHistoryTableList(transaction);
 
         }
 
     }
 
 
-    public void deposit4Demo(Account account, User user, Double amount, int delay) {
+    public void deposit4Demo(Transaction mock_transaction) {
 
-        new Thread(() -> {
-
-            Transaction transaction = null;
-
-            Date requestTime = new Date();
-
-            try {
-                checkTransactionPermission(account, user);
-
-                transaction = new Transaction(account, user, amount, "Deposit", requestTime, delay);
-
-            } catch (Exception e) {
-                transaction = new Transaction(account, user, amount, "Deposit", requestTime, e.getMessage(), delay);
-            } finally {
-                //bankController.addToPendingTransactionsTableList(transaction);
-
-                deposit(account, user, amount, delay, transaction);
-            }
-
-        }).start();
-
+        new Thread(() -> deposit(mock_transaction)).start();
 
     }
 
@@ -224,7 +186,7 @@ public class Bank {
      * the "mock_transaction".
      **/
 
-    private void deposit(Account account, User user, Double amount, int delay, Transaction mock_transaction) {
+    private void deposit(Transaction mock_transaction) {
 
         Transaction transaction = mock_transaction;
 
@@ -232,27 +194,21 @@ public class Bank {
 
         try {
 
-            //bankController.delayThread();
+            //launcherController.delayThread();
 
-            checkTransactionPermission(account, user);
-
-            if (delay != 0) {
+            if (transaction.getDelay() != 0) {
                 requestTime = new Date();
             }
 
-            account.updateBalance(amount, 'D');
+            transaction.getAccount().updateBalance(transaction.getAmount(), 'D');
 
-            transaction.completeSuccessful(account, amount, requestTime);
+            transaction.completeSuccessful(transaction.getAccount(),transaction.getAmount(), requestTime);
 
         } catch (Exception ignored) {
 
         } finally {
 
-            account.transactions.add(transaction);
-
-            //bankController.deleteFromPendingTransactionsTableList(transaction);
-
-            //bankController.updateTransactionHistoryTableList(transaction);
+            transaction.getAccount().transactions.add(transaction);
 
         }
 

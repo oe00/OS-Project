@@ -1,6 +1,7 @@
 package models;
 
 import controller.LauncherController;
+import models.bank.controller.BankController;
 import models.bank.logic.Account;
 import models.bank.logic.Bank;
 import models.user.logic.User;
@@ -10,6 +11,10 @@ import java.util.ArrayList;
 public class Main {
 
     public Bank bank;
+
+    public void setBankController(BankController bankController) {
+        bank.setController(bankController);
+    }
 
     public Main(LauncherController launcherController) {
 

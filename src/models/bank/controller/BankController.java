@@ -89,8 +89,6 @@ public class BankController {
 
                         Transaction mock_transaction = (Transaction) is.readObject();
 
-                        addToPendingTransactionsTable(mock_transaction);
-
                         switch (mock_transaction.getType()) {
                             case "Deposit":
                                 deposit(mock_transaction, os);
@@ -217,6 +215,8 @@ public class BankController {
 
         new Thread(() -> {
 
+            addToPendingTransactionsTable(transaction);
+
             delay4Demo = transaction.getDelay();
 
             main.bank.deposit(transaction);
@@ -243,6 +243,8 @@ public class BankController {
         }
 
         new Thread(() -> {
+
+            addToPendingTransactionsTable(transaction);
 
             delay4Demo = transaction.getDelay();
 

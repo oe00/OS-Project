@@ -25,6 +25,8 @@ public class BankApp extends Stage {
         setScene(new Scene(root));
         sizeToScene();
         show();
+
+        this.setOnCloseRequest(event -> System.exit(0));
     }
 
 

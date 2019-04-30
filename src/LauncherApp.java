@@ -18,6 +18,8 @@ public class LauncherApp extends Application {
         primaryStage.sizeToScene();
         primaryStage.show();
 
+        primaryStage.setOnCloseRequest(event -> System.exit(0));
+
     }
 
 

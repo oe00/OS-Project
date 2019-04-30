@@ -113,7 +113,7 @@ public class Bank {
      * the "mock_transaction".
      **/
 
-    public void withdraw(Transaction mock_transaction) {
+    public synchronized void withdraw(Transaction mock_transaction) {
 
         Transaction transaction = mock_transaction;
 
@@ -164,7 +164,7 @@ public class Bank {
      * the "mock_transaction".
      **/
 
-    public void deposit(Transaction mock_transaction) {
+    public synchronized void deposit(Transaction mock_transaction) {
 
         Transaction transaction = mock_transaction;
 

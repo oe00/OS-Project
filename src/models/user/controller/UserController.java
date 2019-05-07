@@ -150,14 +150,6 @@ public class UserController {
     }
 
 
-    /**
-     * intentional delay for StreamCorruptedException
-     * when user sends transaction requests concurrently,
-     * order of input/output through object stream is corrupted because same i/o stream is used,
-     * however if we wait until i/o for transaction is complete, no such exception occurs,
-     * alternatively one can use synchronization instead of delay
-     **/
-
     private boolean badInput() {
 
         Account account = accountTable.getSelectionModel().getSelectedItem();
@@ -253,7 +245,7 @@ public class UserController {
 
     private void demoDelay() {
         try {
-            TimeUnit.SECONDS.sleep(1);
+            TimeUnit.MILLISECONDS.sleep(750);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

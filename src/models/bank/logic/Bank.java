@@ -89,7 +89,7 @@ public class Bank {
 
     private void demoDelay() {
         try {
-            TimeUnit.SECONDS.sleep(2);
+            TimeUnit.MILLISECONDS.sleep(1500);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

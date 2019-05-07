@@ -16,7 +16,6 @@ public class Transaction implements Serializable {
 
     private String completeTime;
     private String startTime;
-    private String delayTime;
     private Integer delay;
 
     private final String transactionUUID;
@@ -46,21 +45,14 @@ public class Transaction implements Serializable {
         this.type = type;
         balanceAfterTransaction = account.getBalance();
 
-
         if (account.getBalance() - amount < 0) {
             status = "Failed";
         } else {
             status = "Completed";
         }
 
-
         this.delay = delay;
 
-        if (delay != 0)
-            this.delayTime = delay + " Second";
-        else {
-            delayTime = "None";
-        }
     }
 
     public Transaction(Account account, User user, Double amount, String type, Date startTime, int delay) {
@@ -104,7 +96,7 @@ public class Transaction implements Serializable {
         return new SimpleStringProperty(user.getName());
     }
 
-    public Integer getDelay() {
+    Integer getDelay() {
         return delay;
     }
 

@@ -4,18 +4,22 @@ import controller.LauncherController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import models.Main;
 import models.bank.logic.Account;
 import models.bank.logic.Transaction;
 import models.user.logic.User;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class BankController {
@@ -131,7 +135,6 @@ public class BankController {
 
     private final ObservableList<User> userTableList = FXCollections.observableArrayList();
     private final ObservableList<Transaction> transactionHistoryTableList = FXCollections.observableArrayList();
-    private final ObservableList<Transaction> pendingTransactionsTableList = FXCollections.observableArrayList();
 
     private void updateUserList(User user) {
 

@@ -125,8 +125,6 @@ public class Bank {
 
             this.bankAccounts.get(transaction.getAccount().uuid).checkLimit(transaction.getAmount());
 
-            bankController.delayThread();
-
             if (transaction.getDelay() != 0) {
                 requestTime = new Date();
             }
@@ -137,8 +135,6 @@ public class Bank {
 
 
         } catch (Exception e) {
-
-            bankController.delayThread();
 
             if (transaction.getDelay() != 0) {
                 requestTime = new Date();
@@ -171,8 +167,6 @@ public class Bank {
         Date requestTime = new Date();
 
         try {
-
-            bankController.delayThread();
 
             if (transaction.getDelay() != 0) {
                 requestTime = new Date();

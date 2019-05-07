@@ -22,14 +22,11 @@ public class BankController {
 
     private Main main;
 
-    private int delay4Demo;
-
     private ServerSocket serverSocket;
 
     public void initialize() {
 
         initTransactionTable();
-        initPendingTable();
         initUserTable();
     }
 
@@ -132,21 +129,6 @@ public class BankController {
         transactionHistoryTable.setItems(transactionHistoryTableList);
     }
 
-    private void initPendingTable() {
-
-        pendingTransactionsTable_ID.setCellValueFactory(cD -> cD.getValue().getIdSP());
-        pendingTransactionsTable_StartTime.setCellValueFactory(cD -> cD.getValue().getStartTimeSP());
-        pendingTransactionsTable_User.setCellValueFactory(cD -> cD.getValue().getUserSP());
-        pendingTransactionsTable_Account.setCellValueFactory(cD -> cD.getValue().getAccountSP());
-        pendingTransactionsTable_Type.setCellValueFactory(cD -> cD.getValue().getTypeSP());
-        pendingTransactionsTable_Amount.setCellValueFactory(cD -> cD.getValue().getAmountSP());
-        pendingTransactionsTable_Balance.setCellValueFactory(cD -> cD.getValue().getBalanceSP());
-        pendingTransactionsTable_Result.setCellValueFactory(cD -> cD.getValue().getStatusSP());
-
-        pendingTransactionsTable.setItems(pendingTransactionsTableList);
-    }
-
-
     private final ObservableList<User> userTableList = FXCollections.observableArrayList();
     private final ObservableList<Transaction> transactionHistoryTableList = FXCollections.observableArrayList();
     private final ObservableList<Transaction> pendingTransactionsTableList = FXCollections.observableArrayList();
@@ -162,16 +144,6 @@ public class BankController {
 
         transactionHistoryTableList.add(transaction);
         transactionHistoryTable.refresh();
-    }
-
-    private void addToPendingTransactionsTable(Transaction transaction) {
-        pendingTransactionsTableList.add(transaction);
-        pendingTransactionsTable.refresh();
-    }
-
-    private void deleteFromPendingTransactionsTable(Transaction transaction) {
-        pendingTransactionsTableList.remove(transaction);
-        pendingTransactionsTable.refresh();
     }
 
     private boolean checkTransactionInput(Account account, User user, Double amountDouble) {
@@ -197,15 +169,6 @@ public class BankController {
         return true;
     }
 
-    public void delayThread() {
-
-        try {
-            TimeUnit.SECONDS.sleep(delay4Demo);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
 
     private void deposit(Transaction transaction, ObjectOutputStream os) {
 
@@ -215,10 +178,6 @@ public class BankController {
 
         new Thread(() -> {
 
-            addToPendingTransactionsTable(transaction);
-
-            delay4Demo = transaction.getDelay();
-
             main.bank.deposit(transaction);
 
             try {
@@ -226,8 +185,6 @@ public class BankController {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-            deleteFromPendingTransactionsTable(transaction);
 
             addToTransactionHistoryTable(transaction);
 
@@ -243,10 +200,6 @@ public class BankController {
         }
 
         new Thread(() -> {
-
-            addToPendingTransactionsTable(transaction);
-
-            delay4Demo = transaction.getDelay();
 
             main.bank.withdraw(transaction);
 
@@ -294,33 +247,6 @@ public class BankController {
 
     @FXML
     private TableColumn<Transaction, String> transactionHistoryTable_Balance;
-
-    @FXML
-    private TableView<Transaction> pendingTransactionsTable;
-
-    @FXML
-    private TableColumn<Transaction, String> pendingTransactionsTable_ID;
-
-    @FXML
-    private TableColumn<Transaction, String> pendingTransactionsTable_StartTime;
-
-    @FXML
-    private TableColumn<Transaction, String> pendingTransactionsTable_User;
-
-    @FXML
-    private TableColumn<Transaction, String> pendingTransactionsTable_Account;
-
-    @FXML
-    private TableColumn<Transaction, String> pendingTransactionsTable_Type;
-
-    @FXML
-    private TableColumn<Transaction, String> pendingTransactionsTable_Amount;
-
-    @FXML
-    private TableColumn<Transaction, String> pendingTransactionsTable_Balance;
-
-    @FXML
-    private TableColumn<Transaction, String> pendingTransactionsTable_Result;
 
     @FXML
     private TableView<User> userTable;

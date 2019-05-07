@@ -160,14 +160,6 @@ public class UserController {
      * alternatively one can use synchronization instead of delay
      **/
 
-    private void safeBuffer() {
-        try {
-            TimeUnit.SECONDS.sleep(1);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
     private boolean checkTransactionInput() {
 
         Account account = accountTable.getSelectionModel().getSelectedItem();
@@ -216,13 +208,13 @@ public class UserController {
                 e.printStackTrace();
             }
 
-            safeBuffer();
-
             addToTransactionHistoryTable();
 
-            deleteFromPendingTransactionsTableList(mock_transaction);
-
             updateAccountList();
+
+            demoDelay();
+
+            deleteFromPendingTransactionsTableList(mock_transaction);
 
         }).start();
 
@@ -250,15 +242,23 @@ public class UserController {
                 e.printStackTrace();
             }
 
-            safeBuffer();
-
             addToTransactionHistoryTable();
-
-            deleteFromPendingTransactionsTableList(mock_transaction);
 
             updateAccountList();
 
+            demoDelay();
+
+            deleteFromPendingTransactionsTableList(mock_transaction);
+
         }).start();
+    }
+
+    private void demoDelay() {
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 

@@ -1,33 +1,20 @@
 package models.bank.logic;
 
-import controller.LauncherController;
-import models.bank.controller.BankController;
 import models.user.logic.User;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class Bank {
 
-    private BankController bankController;
-    private LauncherController launcherController;
+    public HashMap<UUID, Account> bankAccounts;
+    public HashMap<UUID, User> bankUsers;
 
-    public final HashMap<UUID, Account> bankAccounts;
-    private final HashMap<UUID, User> bankUsers;
-
-    private Bank() {
+    public Bank() {
         bankAccounts = new HashMap<>();
         bankUsers = new HashMap<>();
-    }
-
-    public Bank(LauncherController launcherController) {
-        this();
-        this.launcherController = launcherController;
-    }
-
-    public void setController(BankController bc) {
-        this.bankController = bc;
     }
 
     public Account createAccount(User user, String accountName) {
@@ -47,7 +34,6 @@ public class Bank {
         User user = new User(name);
         bankUsers.put(user.getID(), user);
 
-        launcherController.updateUserList(user);
         return user;
     }
 
@@ -101,13 +87,17 @@ public class Bank {
         }
     }
 
+    private void demoDelay() {
+        try {
+            TimeUnit.SECONDS.sleep(2);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
-    /** sync **/
+
 
     /**
-     * withdraw() method checks for models.models.user permissions, account limit, completes the transaction,
-     * adds it to account transaction history, deletes it from "Pending Transactions" table and adds it
-     * to "Transaction History" table.
      * note: it is taking a "mock_transaction" as input because UUID in "mock_transaction" is unique and already
      * added to "Pending Transactions" table, if a new transaction is instantiated its UUID will be different from
      * the "mock_transaction".
@@ -117,7 +107,7 @@ public class Bank {
 
         Transaction transaction = mock_transaction;
 
-        Date requestTime = new Date();
+        Date requestTime;
 
         try {
 
@@ -125,20 +115,17 @@ public class Bank {
 
             this.bankAccounts.get(transaction.getAccount().uuid).checkLimit(transaction.getAmount());
 
-            if (transaction.getDelay() != 0) {
-                requestTime = new Date();
-            }
+            demoDelay();
+
+            requestTime = new Date();
 
             this.bankAccounts.get(transaction.getAccount().uuid).updateBalance(transaction.getAmount(), 'W');
 
             transaction.completeSuccessful(this.bankAccounts.get(transaction.getAccount().uuid), transaction.getAmount(), requestTime);
 
-
         } catch (Exception e) {
 
-            if (transaction.getDelay() != 0) {
-                requestTime = new Date();
-            }
+            requestTime = new Date();
 
             transaction.completeFail(this.bankAccounts.get(transaction.getAccount().uuid), transaction.getAmount(), requestTime);
 
@@ -149,12 +136,8 @@ public class Bank {
 
     }
 
-    /** sync **/
 
     /**
-     * deposit() method checks for models.models.user permissions, completes the transaction,
-     * adds it to account transaction history, deletes it from "Pending Transactions" table and adds it
-     * to "Transaction History" table.
      * note: it is taking a "mock_transaction" as input because UUID in "mock_transaction" is unique and already
      * added to "Pending Transactions" table, if a new transaction is instantiated its UUID will be different from
      * the "mock_transaction".
@@ -164,13 +147,11 @@ public class Bank {
 
         Transaction transaction = mock_transaction;
 
-        Date requestTime = new Date();
+        Date requestTime;
 
         try {
 
-            if (transaction.getDelay() != 0) {
-                requestTime = new Date();
-            }
+            requestTime = new Date();
 
             this.bankAccounts.get(transaction.getAccount().uuid).updateBalance(transaction.getAmount(), 'D');
 

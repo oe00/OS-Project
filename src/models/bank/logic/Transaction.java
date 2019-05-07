@@ -16,7 +16,6 @@ public class Transaction implements Serializable {
 
     private String completeTime;
     private String startTime;
-    private Integer delay;
 
     private final String transactionUUID;
 
@@ -37,7 +36,7 @@ public class Transaction implements Serializable {
         transactionUUID = UUID.randomUUID().toString();
     }
 
-    public Transaction(Account account, User user, Double amount, String type, int delay) {
+    public Transaction(Account account, User user, Double amount, String type) {
         this();
         this.account = account;
         this.user = user;
@@ -50,13 +49,10 @@ public class Transaction implements Serializable {
         } else {
             status = "Completed";
         }
-
-        this.delay = delay;
-
     }
 
-    public Transaction(Account account, User user, Double amount, String type, Date startTime, int delay) {
-        this(account, user, amount, type, delay);
+    public Transaction(Account account, User user, Double amount, String type, Date startTime) {
+        this(account, user, amount, type);
         this.startTime = date_format.format(startTime);
     }
 
@@ -96,11 +92,7 @@ public class Transaction implements Serializable {
         return new SimpleStringProperty(user.getName());
     }
 
-    Integer getDelay() {
-        return delay;
-    }
-
-    public Account getAccount() {
+    Account getAccount() {
         return account;
     }
 
@@ -108,7 +100,7 @@ public class Transaction implements Serializable {
         return user;
     }
 
-    public Double getAmount() {
+    Double getAmount() {
         return amount;
     }
 

@@ -14,8 +14,6 @@ public class BankApp extends Stage {
         Parent root = loader.load();
         BankController bankController = loader.getController();
 
-        main.setBankController(bankController);
-
         bankController.setMain(main);
 
         bankController.startBank();

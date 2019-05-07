@@ -9,7 +9,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import models.Main;
 import models.bank.BankApp;
-import models.bank.logic.Account;
 import models.user.UserApp;
 import models.user.logic.User;
 
@@ -35,9 +34,9 @@ public class LauncherController {
 
     }
 
-    public void updateUserList(User user) {
+    public void updateUserList(ArrayList<User> users) {
 
-        userTableList.add(user);
+        userTableList.addAll(users);
         userTable.refresh();
 
     }

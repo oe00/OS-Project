@@ -26,8 +26,6 @@ public class UserController {
 
     private Socket socket;
 
-    private final int delay4Demo = 1;
-
 
     public void setUser(User user) {
         this.user = user;
@@ -160,7 +158,7 @@ public class UserController {
      * alternatively one can use synchronization instead of delay
      **/
 
-    private boolean checkTransactionInput() {
+    private boolean badInput() {
 
         Account account = accountTable.getSelectionModel().getSelectedItem();
 
@@ -170,7 +168,7 @@ public class UserController {
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.OK);
             alert.showAndWait();
-            return false;
+            return true;
         }
 
         try {
@@ -180,15 +178,15 @@ public class UserController {
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Please Enter Valid Positive Number", ButtonType.OK);
             alert.showAndWait();
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
 
     public void deposit() {
 
-        if (!checkTransactionInput()) {
+        if (badInput()) {
             return;
         }
 
@@ -198,7 +196,7 @@ public class UserController {
 
             Double amountDouble = Double.parseDouble(amount.getText());
 
-            Transaction mock_transaction = new Transaction(account, this.user, amountDouble, "Deposit", new Date(), delay4Demo);
+            Transaction mock_transaction = new Transaction(account, this.user, amountDouble, "Deposit", new Date());
 
             addToPendingTransactionsTableList(mock_transaction);
 
@@ -208,9 +206,9 @@ public class UserController {
                 e.printStackTrace();
             }
 
-            addToTransactionHistoryTable();
-
             updateAccountList();
+
+            addToTransactionHistoryTable();
 
             demoDelay();
 
@@ -222,7 +220,7 @@ public class UserController {
 
     public void withdraw() {
 
-        if (!checkTransactionInput()) {
+        if (badInput()) {
             return;
         }
 
@@ -232,7 +230,7 @@ public class UserController {
 
             Double amountDouble = Double.parseDouble(amount.getText());
 
-            Transaction mock_transaction = new Transaction(account, this.user, amountDouble, "Withdraw", new Date(), delay4Demo);
+            Transaction mock_transaction = new Transaction(account, this.user, amountDouble, "Withdraw", new Date());
 
             addToPendingTransactionsTableList(mock_transaction);
 
@@ -242,9 +240,9 @@ public class UserController {
                 e.printStackTrace();
             }
 
-            addToTransactionHistoryTable();
-
             updateAccountList();
+
+            addToTransactionHistoryTable();
 
             demoDelay();
 
@@ -295,13 +293,6 @@ public class UserController {
 
     @FXML
     private TextField amount;
-
-    @FXML
-    private Button depositButton;
-
-    @FXML
-    private Button withdrawButton;
-
 
     @FXML
     private TableView<Transaction> pendingTransactionsTable;

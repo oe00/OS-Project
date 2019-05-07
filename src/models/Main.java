@@ -1,7 +1,6 @@
 package models;
 
 import controller.LauncherController;
-import models.bank.controller.BankController;
 import models.bank.logic.Account;
 import models.bank.logic.Bank;
 import models.bank.logic.Transaction;
@@ -13,13 +12,9 @@ public class Main {
 
     public final Bank bank;
 
-    public void setBankController(BankController bankController) {
-        bank.setController(bankController);
-    }
-
     public Main(LauncherController launcherController) {
 
-        bank = new Bank(launcherController);
+        bank = new Bank();
 
         User company = bank.createUser("Oğuzhan");
 
@@ -45,10 +40,11 @@ public class Main {
             }
         }
 
-        bank.deposit(new Transaction(account1, company, 1000.0, "Deposit", 0));
-        bank.deposit(new Transaction(account2, company, 2000.0, "Deposit", 0));
-        bank.deposit(new Transaction(account3, company, 3000.0, "Deposit", 0));
+        launcherController.updateUserList(new ArrayList<>(bank.bankUsers.values()));
 
+        bank.deposit(new Transaction(account1, company, 1000.0, "Deposit"));
+        bank.deposit(new Transaction(account2, company, 2000.0, "Deposit"));
+        bank.deposit(new Transaction(account3, company, 3000.0, "Deposit"));
 
     }
 }

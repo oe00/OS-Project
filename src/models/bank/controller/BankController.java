@@ -4,8 +4,6 @@ import controller.LauncherController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import models.Main;
@@ -118,7 +116,6 @@ public class BankController {
 
     }
 
-
     private void initTransactionTable() {
         transactionHistoryTable_ID.setCellValueFactory(cD -> cD.getValue().getIdSP());
         transactionHistoryTable_StartTime.setCellValueFactory(cD -> cD.getValue().getStartTimeSP());
@@ -149,72 +146,42 @@ public class BankController {
         transactionHistoryTable.refresh();
     }
 
-    private boolean checkTransactionInput(Account account, User user, Double amountDouble) {
-
-        try {
-            if (user == null) throw new Exception("Please Select UserApp");
-            if (account == null) throw new Exception("Please Select Account");
-
-        } catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.OK);
-            alert.showAndWait();
-            return false;
-        }
-
-        try {
-            if (amountDouble < 0) throw new Exception("Negative Input");
-
-        } catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Please Enter Valid Positive Number", ButtonType.OK);
-            alert.showAndWait();
-            return false;
-        }
-        return true;
-    }
-
-
     private void deposit(Transaction transaction, ObjectOutputStream os) {
-
-        if (!checkTransactionInput(transaction.getAccount(), transaction.getUser(), transaction.getAmount())) {
-            return;
-        }
 
         new Thread(() -> {
 
             main.bank.deposit(transaction);
 
-            try {
-                os.writeObject(transaction);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
             sendAccounts(transaction.getUser(), os);
+
+            send2User(transaction,os);
+
+            addToTransactionHistoryTable(transaction);
 
         }).start();
     }
 
     private void withdraw(Transaction transaction, ObjectOutputStream os) {
 
-        if (!checkTransactionInput(transaction.getAccount(), transaction.getUser(), transaction.getAmount())) {
-            return;
-        }
-
         new Thread(() -> {
 
             main.bank.withdraw(transaction);
 
-            try {
-                os.writeObject(transaction);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            sendAccounts(transaction.getUser(), os);
+
+            send2User(transaction,os);
 
             addToTransactionHistoryTable(transaction);
 
-            sendAccounts(transaction.getUser(), os);
-
         }).start();
+    }
+
+    private void send2User(Transaction transaction,ObjectOutputStream os){
+        try {
+            os.writeObject(transaction);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 

@@ -186,8 +186,6 @@ public class BankController {
                 e.printStackTrace();
             }
 
-            addToTransactionHistoryTable(transaction);
-
             sendAccounts(transaction.getUser(), os);
 
         }).start();

@@ -38,7 +38,7 @@ public class Transaction implements Serializable {
         transactionUUID = UUID.randomUUID().toString();
     }
 
-    private Transaction(Account account, User user, Double amount, String type, int delay) {
+    public Transaction(Account account, User user, Double amount, String type, int delay) {
         this();
         this.account = account;
         this.user = user;

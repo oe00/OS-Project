@@ -4,6 +4,7 @@ import controller.LauncherController;
 import models.bank.controller.BankController;
 import models.bank.logic.Account;
 import models.bank.logic.Bank;
+import models.bank.logic.Transaction;
 import models.user.logic.User;
 
 import java.util.ArrayList;
@@ -44,21 +45,10 @@ public class Main {
             }
         }
 
-        try {
+        bank.deposit(new Transaction(account1, company, 1000.0, "Deposit", 0));
+        bank.deposit(new Transaction(account2, company, 2000.0, "Deposit", 0));
+        bank.deposit(new Transaction(account3, company, 3000.0, "Deposit", 0));
 
-            account1.updateBalance(1000.0, 'D');
-            account2.updateBalance(2000.0, 'D');
-            account3.updateBalance(3000.0, 'D');
-
-            /** when threads are sync. use below
-             models.models.user.bank.deposit4Demo(account1, company, 1000.0, 0);
-             models.models.user.bank.deposit4Demo(account2, company, 2000.0, 0);
-             models.models.user.bank.deposit4Demo(account3, company, 3000.0, 0);
-             **/
-
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-        }
 
     }
 }

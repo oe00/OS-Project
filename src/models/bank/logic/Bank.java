@@ -115,7 +115,8 @@ public class Bank {
 
             this.bankAccounts.get(transaction.getAccount().uuid).checkLimit(transaction.getAmount());
 
-            demoDelay();
+            /** below delay is required for not synchronized demo (ui related)**/
+            //demoDelay();
 
             requestTime = new Date();
 

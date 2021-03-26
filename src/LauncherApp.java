@@ -12,7 +12,7 @@ public class LauncherApp extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LauncherView.fxml"));
         loader.load();
         Parent root = loader.getRoot();
-        primaryStage.setTitle("334-Launcher");
+        primaryStage.setTitle("Launcher");
         primaryStage.setResizable(false);
         primaryStage.setScene(new Scene(root));
         primaryStage.sizeToScene();

@@ -22,7 +22,7 @@ public class UserApp extends Stage {
 
         controller.startUser();
 
-        setTitle("334-User");
+        setTitle("User");
         setResizable(false);
         setScene(new Scene(root));
         sizeToScene();

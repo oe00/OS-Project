@@ -18,7 +18,7 @@ public class BankApp extends Stage {
 
         bankController.startBank();
 
-        setTitle("334-Bank");
+        setTitle("Bank");
         setResizable(false);
         setScene(new Scene(root));
         sizeToScene();
